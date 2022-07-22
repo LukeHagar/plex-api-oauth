@@ -9,6 +9,9 @@
   "author": "Luke Hagar",
   "license": "MIT",
   "dependencies": {
-    "plex-oauth": "^2.0.2"
+    "axios": "^0.27.2",
+    "plex-oauth": "^2.0.2",
+    "qs": "^6.11.0",
+    "uuid": "^8.3.2"
   }
 }
