@@ -2,7 +2,9 @@ import { PlexOauth, IPlexClientDetails } from "plex-oauth";
 import v4 from "uuid/dist/v4";
 import axios from "axios";
 import qs from "qs";
-var PlexAPIOauth = /** @class */ function (
+class PlexAPIOauth {
+  
+  constructor(
   clientId,
   product = "Plex-API-OAuth",
   device = "Web Client",
@@ -10,6 +12,13 @@ var PlexAPIOauth = /** @class */ function (
   forwardUrl = "",
   platform = "Web"
 ) {
+  this.clientId = clientId;
+  this.product = product
+  this.device = device
+  this.version = version 
+  this.forwardUrl = forwardUrl
+  this.platform = platform
+
   if (clientId === null) {
     var clientId = localStorage.getItem("plex-client-id"); //Defaults to last used ClientId from any previous runs
   }
@@ -39,12 +48,15 @@ var PlexAPIOauth = /** @class */ function (
   console.log("Plex DataBase:");
   console.log(plexData);
 
-  function openInNewTab(url) {
+}
+  
+
+  openInNewTab(url) {
     var separateWindow = window.open(url, "_blank");
     separateWindow?.focus;
   }
 
-  var clientInformation = {
+  plexClientInformation = {
     clientIdentifier: clientId, // This is a unique identifier used to identify your app with Plex. - If none is provided a new one is generated and saved locally
     product: product, // Name of your application - Defaults to Plex-API-OAuth
     device: device, // The type of device your application is running on - Defaults to "Web Client"
@@ -53,7 +65,7 @@ var PlexAPIOauth = /** @class */ function (
     platform: platform, // Platform your application runs on - Defaults to 'Web'
   };
 
-  var plexOauth = new PlexOauth(clientInformation);
+  plexOauth = new PlexOauth(plexClientInformation);
   // Get hosted UI URL and Pin Id
 
   async function plexLogin() {
@@ -159,6 +171,4 @@ var PlexAPIOauth = /** @class */ function (
     return plexData.plexLibraries;
   }
 };
-module.exports = {
-  PlexAPIOauth: PlexAPIOauth,
-};
+export { PlexAPIOauth };
