@@ -1,10 +1,11 @@
 {
   "name": "plex-api-oauth",
-  "version": "1.0.3",
+  "version": "1.0.37",
   "description": "An NPM Module designed to make Plex Media Server and plex.tv API calls easier to implement in JavaScript and React projects",
-  "main": "index.js",
+  "main": "index.mjs",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha index.test.js"
   },
   "author": "Luke Hagar",
   "license": "MIT",
@@ -13,5 +14,9 @@
     "plex-oauth": "^2.0.2",
     "qs": "^6.11.0",
     "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "mocha": "^10.0.0",
+    "request": "^2.88.2"
   }
 }
