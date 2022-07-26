@@ -1,6 +1,6 @@
 {
   "name": "plex-api-oauth",
-  "version": "1.0.127",
+  "version": "1.0.128",
   "description": "An NPM Module designed to make Plex Media Server and plex.tv API calls easier to implement in JavaScript and React projects",
   "main": "index.mjs",
   "type": "module",

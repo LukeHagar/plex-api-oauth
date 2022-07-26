@@ -278,7 +278,7 @@ export class PlexAPIOAuth {
   }
 
   async GetPlexLibraries() {
-    await this.plexServers?.forEach(async (server) => {
+    this.plexServers?.forEach(async (server) => {
       let response = await axios({
         method: "GET",
         url:
@@ -316,25 +316,29 @@ export class PlexAPIOAuth {
       console.log(server);
       this.plexServers[server] = server;
     });
-    return true;
   }
 
-  async GetPlexLibraryContent(server, library) {
-    let response = await axios({
-      method: "GET",
-      url:
-        server?.relayConnections[0].uri +
-        "/library/sections/" +
-        library.uuid +
-        "?" +
-        qs.stringify({
-          "X-Plex-Token": server?.accessToken,
-        }),
-      headers: { accept: "application/json" },
-    }).catch((err) => {
-      throw err;
+  async GetPlexLibraryContent() {
+    this.plexServers?.forEach(async (server) => {
+      await server?.plexLibraries?.forEach(async (library) => {
+        let response = await axios({
+          method: "GET",
+          url:
+            server?.relayConnections[0].uri +
+            "/library/sections/" +
+            library.uuid +
+            "?" +
+            qs.stringify({
+              "X-Plex-Token": server?.accessToken,
+            }),
+          headers: { accept: "application/json" },
+        }).catch((err) => {
+          throw err;
+        });
+        console.log(response);
+      });
     });
-    console.log(response);
+
     return true;
     // this.plexMusic = response?.data?.MediaContainer?.Directory;
 
