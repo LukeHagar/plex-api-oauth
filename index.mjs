@@ -309,6 +309,7 @@ export class PlexAPIOAuth {
       plexMovieLibraries: plexMovieLibraries,
       plexTVShowLibraries: plexTVShowLibraries,
     };
+    console.log(server);
     this.plexServers[this.plexServers.indexOf(server)] = server;
     return {
       plexLibraries: plexLibraries,
