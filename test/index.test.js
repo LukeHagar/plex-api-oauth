@@ -9,7 +9,4 @@ describe("Login Test", function () {
     console.log(plexapioauth);
     assert.strictEqual(PlexLogin(plexapioauth.plexClientInformation), null);
   });
-  //   it("should be able to successfully login", function () {
-  //     assert.notEqual(PlexLogin(), null);
-  //   });
 });
