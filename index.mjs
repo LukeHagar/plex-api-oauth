@@ -277,46 +277,46 @@ export class PlexAPIOAuth {
     return response.data;
   }
 
-  async GetPlexLibraries(server) {
-    let response = await axios({
-      method: "GET",
-      url:
-        server?.relayConnections[0].uri +
-        "/library/sections/?" +
-        qs.stringify({
-          "X-Plex-Token": server?.accessToken,
-        }),
-      headers: { accept: "application/json" },
-    }).catch((err) => {
-      throw err;
+  async GetPlexLibraries() {
+    await this.plexServers?.forEach(async (server) => {
+      let response = await axios({
+        method: "GET",
+        url:
+          server?.relayConnections[0].uri +
+          "/library/sections/?" +
+          qs.stringify({
+            "X-Plex-Token": server?.accessToken,
+          }),
+        headers: { accept: "application/json" },
+      }).catch((err) => {
+        throw err;
+      });
+
+      let plexLibraries = response?.data?.MediaContainer?.Directory;
+      let plexMusicLibraries =
+        response?.data?.MediaContainer?.Directory?.filter(
+          (obj) => obj.type === "artist"
+        );
+      let plexMovieLibraries =
+        response?.data?.MediaContainer?.Directory?.filter(
+          (obj) => obj.type === "movie"
+        );
+      let plexTVShowLibraries =
+        response?.data?.MediaContainer?.Directory?.filter(
+          (obj) => obj.type === "show"
+        );
+
+      console.log(this.plexServers[server]);
+      server.libraries = {
+        plexLibraries: plexLibraries,
+        plexMusicLibraries: plexMusicLibraries,
+        plexMovieLibraries: plexMovieLibraries,
+        plexTVShowLibraries: plexTVShowLibraries,
+      };
+      console.log(server);
+      this.plexServers[server] = server;
     });
-
-    let plexLibraries = response?.data?.MediaContainer?.Directory;
-    let plexMusicLibraries = response?.data?.MediaContainer?.Directory?.filter(
-      (obj) => obj.type === "artist"
-    );
-    let plexMovieLibraries = response?.data?.MediaContainer?.Directory?.filter(
-      (obj) => obj.type === "movie"
-    );
-    let plexTVShowLibraries = response?.data?.MediaContainer?.Directory?.filter(
-      (obj) => obj.type === "show"
-    );
-
-    console.log(this.plexServers[this.plexServers.indexOf(server)]);
-    server.libraries = {
-      plexLibraries: plexLibraries,
-      plexMusicLibraries: plexMusicLibraries,
-      plexMovieLibraries: plexMovieLibraries,
-      plexTVShowLibraries: plexTVShowLibraries,
-    };
-    console.log(server);
-    this.plexServers[this.plexServers.indexOf(server)] = server;
-    return {
-      plexLibraries: plexLibraries,
-      plexMusicLibraries: plexMusicLibraries,
-      plexMovieLibraries: plexMovieLibraries,
-      plexTVShowLibraries: plexTVShowLibraries,
-    };
+    return true;
   }
 
   async GetPlexLibraryContent(server, library) {
