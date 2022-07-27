@@ -26,8 +26,8 @@ export class PlexAPIOAuth {
     plexTVAuthToken = "",
     plexTVUserData = {},
     plexServers = [],
-    plexDevices = [],
-    selectedPlexServer = {}
+    plexLibraries = [],
+    plexDevices = []
   ) {
     this.clientId = clientId;
     this.product = product;
@@ -39,9 +39,31 @@ export class PlexAPIOAuth {
     this.plexTVAuthToken = plexTVAuthToken;
     this.plexTVUserData = plexTVUserData;
     this.plexServers = plexServers;
+    this.plexLibraries = plexLibraries;
     this.plexDevices = plexDevices;
-    this.selectedPlexServer = selectedPlexServer;
 
+    this.plexClientInformation = {
+      clientIdentifier: this.clientId, // This is a unique identifier used to identify your app with Plex. - If none is provided a new one is generated and saved locally
+      product: this.product, // Name of your application - Defaults to Plex-API-OAuth
+      device: this.device, // The type of device your application is running on - Defaults to "Web Client"
+      version: this.version, // Version of your application - Defaults to 1
+      forwardUrl: this.forwardUrl, // Url to forward back to after signing in - Defaults to an empty string
+      platform: this.platform, // Platform your application runs on - Defaults to 'Web'
+    };
+  }
+
+  PlexLogout() {
+    this.clientId = "";
+    this.product = "Plex-API-OAuth";
+    this.device = "Web-Client";
+    this.version = "1";
+    this.forwardUrl = "";
+    this.platform = "Web";
+    this.plexTVAuthToken = "";
+    this.plexTVUserData = {};
+    this.plexServers = [];
+    this.plexLibraries = [];
+    this.plexDevices = [];
     this.plexClientInformation = {
       clientIdentifier: this.clientId, // This is a unique identifier used to identify your app with Plex. - If none is provided a new one is generated and saved locally
       product: this.product, // Name of your application - Defaults to Plex-API-OAuth
@@ -62,8 +84,8 @@ export class PlexAPIOAuth {
     plexTVAuthToken = "",
     plexTVUserData = {},
     plexServers = [],
+    plexLibraries = [],
     plexDevices = [],
-    selectedPlexServer = {},
   }) {
     this.plexTVAuthToken = plexTVAuthToken;
     this.plexTVUserData = plexTVUserData;
@@ -74,8 +96,8 @@ export class PlexAPIOAuth {
     this.forwardUrl = forwardUrl;
     this.platform = platform;
     this.plexServers = plexServers;
+    this.plexLibraries = plexLibraries;
     this.plexDevices = plexDevices;
-    this.selectedPlexServer = selectedPlexServer;
 
     this.plexClientInformation = {
       clientIdentifier: this.clientId, // This is a unique identifier used to identify your app with Plex. - If none is provided a new one is generated and saved locally
@@ -99,8 +121,8 @@ export class PlexAPIOAuth {
       forwardUrl: this.forwardUrl,
       platform: this.platform,
       plexServers: this.plexServers,
+      plexLibraries: this.plexLibraries,
       plexDevices: this.plexDevices,
-      selectedPlexServer: this.selectedPlexServer,
       plexClientInformation: this.plexClientInformation,
     };
     console.log(sessionData);
@@ -239,21 +261,21 @@ export class PlexAPIOAuth {
         return {
           name: Obj.name,
           product: Obj.product,
-          productVersion: Obj.product,
+          productVersion: Obj.productVersion,
           platform: Obj.platform,
-          platformVersion: Obj.platform,
+          platformVersion: Obj.platformVersion,
           device: Obj.device,
-          clientIdentifier: Obj.client,
-          createdAt: Obj.created,
-          lastSeenAt: Obj.last,
+          clientIdentifier: Obj.clientIdentifier,
+          createdAt: Obj.createdAt,
+          lastSeenAt: Obj.lastSeenAt,
           localConnections: Obj.connections.filter(
             (connection) => connection.local === true
           ),
           provides: Obj.provides,
-          ownerId: Obj.owner,
-          sourceTitle: Obj.source,
-          publicAddress: Obj.public,
-          accessToken: Obj.access,
+          ownerId: Obj.ownerId,
+          sourceTitle: Obj.sourceTitle,
+          publicAddress: Obj.publicAddress,
+          accessToken: Obj.accessToken,
           owned: Obj.owned,
           home: Obj.home,
           synced: Obj.synced,
@@ -262,34 +284,71 @@ export class PlexAPIOAuth {
             (connection) => connection.relay === true
           ),
           presence: Obj.presence,
-          httpsRequired: Obj.https,
-          publicAddressMatches: Obj.public,
-          dnsRebindingProtection: Obj.dns,
+          httpsRequired: Obj.httpsRequired,
+          publicAddressMatches: Obj.publicAddressMatches,
+          dnsRebindingProtection: Obj.dnsRebindingProtection,
           natLoopbackSupported: Obj.natLoopbackSupported,
           connections: Obj.connections,
         };
       });
-    return response.data;
+    return this.plexServers;
   }
 
-  async GetPlexLibraries() {
-    let libraryArray = []
-    this.plexServers.forEach((server) => {
+  GetPlexLibraries() {
+    let libraryArray = null;
+    this.plexServers.forEach(async (server) => {
       let response = await axios({
-      method: "GET",
-      url:
-        server.relayConnections[0].uri +
-        "/library/sections/?" +
-        qs.stringify({
-          "X-Plex-Token": server.accessToken,
-        }),
-      headers: { accept: "application/json" },
-    }).catch((err) => {
-      throw err;
+        method: "GET",
+        url:
+          server.relayConnections[0].uri +
+          "/library/sections/?" +
+          qs.stringify({
+            "X-Plex-Token": server.accessToken,
+          }),
+        headers: { accept: "application/json" },
+      }).catch((err) => {
+        throw err;
+      });
+      if (libraryArray == null) {
+        libraryArray = [...response?.data?.MediaContainer?.Directory];
+      } else {
+        libraryArray = [
+          ...libraryArray,
+          ...response?.data?.MediaContainer?.Directory,
+        ];
+      }
+      this.plexLibraries = libraryArray;
+      // return await response?.data?.MediaContainer?.Directory.map((entry) => {
+      // return {
+      //   server: server.clientIdentifier,
+      //   allowSync: entry.allowSync,
+      //   art: entry.art,
+      //   composite: entry.composite,
+      //   filters: entry.filters,
+      //   refreshing: entry.refreshing,
+      //   thumb: entry.thumb,
+      //   key: entry.key,
+      //   type: entry.type,
+      //   title: entry.title,
+      //   agent: entry.agent,
+      //   scanner: entry.scanner,
+      //   language: entry.language,
+      //   uuid: entry.uuid,
+      //   updatedAt: entry.updatedAt,
+      //   createdAt: entry.createdAt,
+      //   scannedAt: entry.scannedAt,
+      //   content: entry.content,
+      //   directory: entry.directory,
+      //   contentChangedAt: entry.contentChangedAt,
+      //   hidden: entry.hidden,
+      //   Location: entry.Location,
+      // };
+      // });
     });
-    libraryArray = [...libraryArray, ...response?.data?.MediaContainer?.Directory]
-  })
-  this.plexLibraries = libraryArray
+    // Promise.all(response).then((results) => {
+    //   this.plexLibraries = results;
+    // });
+    return this.plexLibraries;
   }
 
   // async PopulateLibraryContent(server: PlexServer, library: PlexLibrary) {

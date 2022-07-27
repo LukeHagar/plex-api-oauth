@@ -38,4 +38,14 @@ describe("Login Test", function () {
     console.log("Plex Servers");
     console.log(PlexSession.plexServers);
   });
+  it("Get Plex Libraries", async function () {
+    //this.timeout(10000);
+    let response = await PlexSession.GetPlexLibraries();
+    assert.notEqual(PlexSession.plexLibraries, null);
+    assert.notEqual(PlexSession.plexLibraries, undefined);
+    assert.notEqual(PlexSession.plexLibraries, emptyArray);
+    assert.notEqual(await response, null);
+    console.log("Plex Libraries");
+    console.log(PlexSession.plexLibraries);
+  });
 });
