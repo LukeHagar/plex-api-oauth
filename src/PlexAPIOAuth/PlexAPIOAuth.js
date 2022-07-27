@@ -14,7 +14,7 @@ export class PlexAPIOAuth {
   plexTVAuthToken;
   plexTVUserData;
   plexServers;
-  selectedPlexServer;
+  plexLibraries;
   plexDevices;
   constructor(
     clientId = "",
@@ -232,25 +232,65 @@ export class PlexAPIOAuth {
     }).catch((err) => {
       throw err;
     });
-    this.plexServers = response.data;
+    this.plexDevices = response.data;
+    this.plexServers = response.data
+      .filter((Obj) => Obj.product === "Plex Media Server")
+      .map((Obj) => {
+        return {
+          name: Obj.name,
+          product: Obj.product,
+          productVersion: Obj.product,
+          platform: Obj.platform,
+          platformVersion: Obj.platform,
+          device: Obj.device,
+          clientIdentifier: Obj.client,
+          createdAt: Obj.created,
+          lastSeenAt: Obj.last,
+          localConnections: Obj.connections.filter(
+            (connection) => connection.local === true
+          ),
+          provides: Obj.provides,
+          ownerId: Obj.owner,
+          sourceTitle: Obj.source,
+          publicAddress: Obj.public,
+          accessToken: Obj.access,
+          owned: Obj.owned,
+          home: Obj.home,
+          synced: Obj.synced,
+          relay: Obj.relay,
+          relayConnections: Obj.connections.filter(
+            (connection) => connection.relay === true
+          ),
+          presence: Obj.presence,
+          httpsRequired: Obj.https,
+          publicAddressMatches: Obj.public,
+          dnsRebindingProtection: Obj.dns,
+          natLoopbackSupported: Obj.natLoopbackSupported,
+          connections: Obj.connections,
+        };
+      });
     return response.data;
   }
 
-  // async GetPlexLibraries(server) {
-  //   let response = await axios({
-  //     method: "GET",
-  //     url:
-  //       server.relayConnections[0].uri +
-  //       "/library/sections/?" +
-  //       qs.stringify({
-  //         "X-Plex-Token": server.accessToken,
-  //       }),
-  //     headers: { accept: "application/json" },
-  //   }).catch((err) => {
-  //     throw err;
-  //   });
-  //   return response?.data?.MediaContainer?.Directory;
-  // }
+  async GetPlexLibraries() {
+    let libraryArray = []
+    this.plexServers.forEach((server) => {
+      let response = await axios({
+      method: "GET",
+      url:
+        server.relayConnections[0].uri +
+        "/library/sections/?" +
+        qs.stringify({
+          "X-Plex-Token": server.accessToken,
+        }),
+      headers: { accept: "application/json" },
+    }).catch((err) => {
+      throw err;
+    });
+    libraryArray = [...libraryArray, ...response?.data?.MediaContainer?.Directory]
+  })
+  this.plexLibraries = libraryArray
+  }
 
   // async PopulateLibraryContent(server: PlexServer, library: PlexLibrary) {
   //   let response = await axios({
