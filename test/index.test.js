@@ -39,12 +39,20 @@ describe("Login Test", function () {
     console.log(PlexSession.plexServers);
   });
   it("Get Plex Libraries", async function () {
-    //this.timeout(10000);
+    this.timeout(10000);
     let response = await PlexSession.GetPlexLibraries();
     assert.notEqual(PlexSession.plexLibraries, null);
     assert.notEqual(PlexSession.plexLibraries, undefined);
     assert.notEqual(PlexSession.plexLibraries, emptyArray);
-    assert.notEqual(await response, null);
+    assert.notEqual(PlexSession.plexMusicLibraries, null);
+    assert.notEqual(PlexSession.plexMusicLibraries, undefined);
+    assert.notEqual(PlexSession.plexMusicLibraries, emptyArray);
+    assert.notEqual(PlexSession.plexMovieLibraries, null);
+    assert.notEqual(PlexSession.plexMovieLibraries, undefined);
+    assert.notEqual(PlexSession.plexMovieLibraries, emptyArray);
+    assert.notEqual(PlexSession.plexTVShowLibraries, null);
+    assert.notEqual(PlexSession.plexTVShowLibraries, undefined);
+    assert.notEqual(PlexSession.plexTVShowLibraries, emptyArray);
     console.log("Plex Libraries");
     console.log(PlexSession.plexLibraries);
   });

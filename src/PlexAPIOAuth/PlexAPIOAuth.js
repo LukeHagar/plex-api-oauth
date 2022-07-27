@@ -15,6 +15,9 @@ export class PlexAPIOAuth {
   plexTVUserData;
   plexServers;
   plexLibraries;
+  plexMusicLibraries;
+  plexMovieLibraries;
+  plexTVShowLibraries;
   plexDevices;
   constructor(
     clientId = "",
@@ -27,6 +30,9 @@ export class PlexAPIOAuth {
     plexTVUserData = {},
     plexServers = [],
     plexLibraries = [],
+    plexMusicLibraries = [],
+    plexMovieLibraries = [],
+    plexTVShowLibraries = [],
     plexDevices = []
   ) {
     this.clientId = clientId;
@@ -40,6 +46,9 @@ export class PlexAPIOAuth {
     this.plexTVUserData = plexTVUserData;
     this.plexServers = plexServers;
     this.plexLibraries = plexLibraries;
+    this.plexMusicLibraries = plexMusicLibraries;
+    this.plexMovieLibraries = plexMovieLibraries;
+    this.plexTVShowLibraries = plexTVShowLibraries;
     this.plexDevices = plexDevices;
 
     this.plexClientInformation = {
@@ -63,6 +72,9 @@ export class PlexAPIOAuth {
     this.plexTVUserData = {};
     this.plexServers = [];
     this.plexLibraries = [];
+    this.plexMusicLibraries = [];
+    this.plexMovieLibraries = [];
+    this.plexTVShowLibraries = [];
     this.plexDevices = [];
     this.plexClientInformation = {
       clientIdentifier: this.clientId, // This is a unique identifier used to identify your app with Plex. - If none is provided a new one is generated and saved locally
@@ -85,6 +97,9 @@ export class PlexAPIOAuth {
     plexTVUserData = {},
     plexServers = [],
     plexLibraries = [],
+    plexMusicLibraries = [],
+    plexMovieLibraries = [],
+    plexTVShowLibraries = [],
     plexDevices = [],
   }) {
     this.plexTVAuthToken = plexTVAuthToken;
@@ -97,6 +112,9 @@ export class PlexAPIOAuth {
     this.platform = platform;
     this.plexServers = plexServers;
     this.plexLibraries = plexLibraries;
+    this.plexMusicLibraries = plexMusicLibraries;
+    this.plexMovieLibraries = plexMovieLibraries;
+    this.plexTVShowLibraries = plexTVShowLibraries;
     this.plexDevices = plexDevices;
 
     this.plexClientInformation = {
@@ -122,6 +140,9 @@ export class PlexAPIOAuth {
       platform: this.platform,
       plexServers: this.plexServers,
       plexLibraries: this.plexLibraries,
+      plexMusicLibraries: this.plexMusicLibraries,
+      plexMovieLibraries: this.plexMovieLibraries,
+      plexTVShowLibraries: this.plexTVShowLibraries,
       plexDevices: this.plexDevices,
       plexClientInformation: this.plexClientInformation,
     };
@@ -294,9 +315,9 @@ export class PlexAPIOAuth {
     return this.plexServers;
   }
 
-  GetPlexLibraries() {
-    let libraryArray = null;
-    this.plexServers.forEach(async (server) => {
+  async GetPlexLibraries() {
+    let libraryArray = [];
+    for (const server of this.plexServers) {
       let response = await axios({
         method: "GET",
         url:
@@ -309,46 +330,50 @@ export class PlexAPIOAuth {
       }).catch((err) => {
         throw err;
       });
-      if (libraryArray == null) {
-        libraryArray = [...response?.data?.MediaContainer?.Directory];
-      } else {
-        libraryArray = [
-          ...libraryArray,
-          ...response?.data?.MediaContainer?.Directory,
-        ];
+      for (const library of response.data.MediaContainer.Directory) {
+        libraryArray.push({
+          server: server.clientIdentifier,
+          allowSync: library.allowSync,
+          art: library.art,
+          composite: library.composite,
+          filters: library.filters,
+          refreshing: library.refreshing,
+          thumb: library.thumb,
+          key: library.key,
+          type: library.type,
+          title: library.title,
+          agent: library.agent,
+          scanner: library.scanner,
+          language: library.language,
+          uuid: library.uuid,
+          updatedAt: library.updatedAt,
+          createdAt: library.createdAt,
+          scannedAt: library.scannedAt,
+          content: library.content,
+          directory: library.directory,
+          contentChangedAt: library.contentChangedAt,
+          hidden: library.hidden,
+          Location: library.Location,
+        });
       }
-      this.plexLibraries = libraryArray;
+      // console.log(libraryArray);
+      // this.plexLibraries = libraryArray;
       // return await response?.data?.MediaContainer?.Directory.map((entry) => {
-      // return {
-      //   server: server.clientIdentifier,
-      //   allowSync: entry.allowSync,
-      //   art: entry.art,
-      //   composite: entry.composite,
-      //   filters: entry.filters,
-      //   refreshing: entry.refreshing,
-      //   thumb: entry.thumb,
-      //   key: entry.key,
-      //   type: entry.type,
-      //   title: entry.title,
-      //   agent: entry.agent,
-      //   scanner: entry.scanner,
-      //   language: entry.language,
-      //   uuid: entry.uuid,
-      //   updatedAt: entry.updatedAt,
-      //   createdAt: entry.createdAt,
-      //   scannedAt: entry.scannedAt,
-      //   content: entry.content,
-      //   directory: entry.directory,
-      //   contentChangedAt: entry.contentChangedAt,
-      //   hidden: entry.hidden,
-      //   Location: entry.Location,
-      // };
       // });
-    });
+    }
     // Promise.all(response).then((results) => {
     //   this.plexLibraries = results;
     // });
-    return this.plexLibraries;
+    this.plexLibraries = libraryArray;
+    this.plexMusicLibraries = libraryArray.filter(
+      (Obj) => Obj.type === "artist"
+    );
+    this.plexMovieLibraries = libraryArray.filter(
+      (Obj) => Obj.type === "movie"
+    );
+    this.plexTVShowLibraries = libraryArray.filter(
+      (Obj) => Obj.type === "show"
+    );
   }
 
   // async PopulateLibraryContent(server: PlexServer, library: PlexLibrary) {
