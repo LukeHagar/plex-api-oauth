@@ -28,8 +28,8 @@ describe("Unit Tests", function () {
     // console.log(PlexSession.plexTVUserData);
   });
   it("Get Plex Servers", async function () {
-    this.timeout(10000);
-    let response = await PlexSession.GetPlexServers();
+    this.timeout(12000);
+    let response = await PlexSession.GetPlexServers({ owned: true });
     assert.notEqual(PlexSession.plexServers, emptyArray);
     assert.notEqual(PlexSession.plexServers, null);
     assert.notEqual(PlexSession.plexServers, undefined);
@@ -39,8 +39,8 @@ describe("Unit Tests", function () {
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
-    // console.log("Plex Servers");
-    // console.log(PlexSession.plexServers);
+    //console.log("Plex Servers");
+    //console.log(PlexSession.plexServers);
   });
   it("Get Plex Libraries", async function () {
     this.timeout(10000);
@@ -51,40 +51,97 @@ describe("Unit Tests", function () {
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
-    // console.log("Plex Libraries");
-    // console.log(PlexSession.plexLibraries);
+    //console.log("Plex Libraries");
+    //console.log(PlexSession.plexLibraries);
   });
-  it("Get Plex Movies Libraries", async function () {
-    this.timeout(10000);
+  it("Get Plex Movie Libraries", async function () {
+    this.timeout(20000);
     let response = await PlexSession.GetPlexMovieLibraries();
-    assert.notEqual(PlexSession.plexMovieLibraries, null);
-    assert.notEqual(PlexSession.plexMovieLibraries, undefined);
-    assert.notEqual(PlexSession.plexMovieLibraries, emptyArray);
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
-    // console.log("Plex Libraries");
-    // console.log(PlexSession.plexLibraries);
+    // console.log("Plex Movie Libraries");
+    // console.log(response);
   });
   it("Get Plex Music Libraries", async function () {
     this.timeout(10000);
     let response = await PlexSession.GetPlexMusicLibraries();
-    assert.notEqual(PlexSession.plexMusicLibraries, null);
-    assert.notEqual(PlexSession.plexMusicLibraries, undefined);
-    assert.notEqual(PlexSession.plexMusicLibraries, emptyArray);
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
-    // console.log("Plex Libraries");
-    // console.log(PlexSession.plexLibraries);
+    // console.log("Plex Music Libraries");
+    // console.log(response);
   });
   it("Get Plex TV Libraries", async function () {
     this.timeout(10000);
     let response = await PlexSession.GetPlexTVShowLibraries();
-    assert.notEqual(PlexSession.plexTVShowLibraries, null);
-    assert.notEqual(PlexSession.plexTVShowLibraries, undefined);
-    assert.notEqual(PlexSession.plexTVShowLibraries, emptyArray);
-    // console.log("Plex Libraries");
-    // console.log(PlexSession.plexLibraries);
+    assert.notEqual(response, emptyArray);
+    assert.notEqual(response, null);
+    assert.notEqual(response, undefined);
+    // console.log("Plex TV Libraries");
+    // console.log(response);
+  });
+  it("Get Plex Movies", async function () {
+    this.timeout(10000);
+    let response = await PlexSession.GetPlexMovies();
+    assert.notEqual(response, emptyArray);
+    assert.notEqual(response, null);
+    assert.notEqual(response, undefined);
+    // console.log("Plex Movies");
+    // console.log(response);
+  });
+  it("Get Plex Shows", async function () {
+    this.timeout(10000);
+    let response = await PlexSession.GetPlexShows();
+    assert.notEqual(response, emptyArray);
+    assert.notEqual(response, null);
+    assert.notEqual(response, undefined);
+    // console.log("Plex Shows");
+    // console.log(response);
+  });
+  it("Get Plex Seasons", async function () {
+    this.timeout(10000);
+    let response = await PlexSession.GetPlexSeasons();
+    assert.notEqual(response, emptyArray);
+    assert.notEqual(response, null);
+    assert.notEqual(response, undefined);
+    // console.log("Plex Seasons");
+    // console.log(response);
+  });
+  it("Get Plex Episodes", async function () {
+    this.timeout(20000);
+    let response = await PlexSession.GetPlexEpisodes();
+    assert.notEqual(response, emptyArray);
+    assert.notEqual(response, null);
+    assert.notEqual(response, undefined);
+    // console.log("Plex Episodes");
+    // console.log(response);
+  });
+  it("Get Plex Artists", async function () {
+    this.timeout(10000);
+    let response = await PlexSession.GetPlexArtists();
+    assert.notEqual(response, emptyArray);
+    assert.notEqual(response, null);
+    assert.notEqual(response, undefined);
+    // console.log("Plex Artists");
+    // console.log(response);
+  });
+  it("Get Plex Albums", async function () {
+    this.timeout(10000);
+    let response = await PlexSession.GetPlexAlbums();
+    assert.notEqual(response, emptyArray);
+    assert.notEqual(response, null);
+    assert.notEqual(response, undefined);
+    // console.log("Plex Albums");
+    // console.log(response);
+  });
+  it("Get Plex Songs", async function () {
+    this.timeout(20000);
+    let response = await PlexSession.GetPlexSongs();
+    assert.notEqual(response, emptyArray);
+    assert.notEqual(response, null);
+    assert.notEqual(response, undefined);
+    //console.log("Plex Songs");
+    //console.log(response);
   });
 });
