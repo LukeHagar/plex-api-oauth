@@ -15,12 +15,6 @@ export class PlexAPIOAuth {
   plexTVUserData;
   plexServers;
   plexLibraries;
-  plexArtistLibraries;
-  plexAlbumLibraries;
-  plexSongLibraries;
-  plexMusicLibraries;
-  plexMovieLibraries;
-  plexTVShowLibraries;
   plexDevices;
   constructor(
     clientId = "",
@@ -33,15 +27,6 @@ export class PlexAPIOAuth {
     plexTVUserData = {},
     plexServers = [],
     plexLibraries = [],
-    plexArtistLibraries = [],
-    plexAlbumLibraries = [],
-    plexSongLibraries = [],
-    plexMusicLibraries = [],
-    plexMovieLibraries = [],
-    plexTVShowLibraries = [],
-    plexLibraryContent = [],
-    plexMovieLibraryContent = [],
-    plexTVShowLibraryContent = [],
     plexDevices = []
   ) {
     this.clientId = clientId;
@@ -53,17 +38,8 @@ export class PlexAPIOAuth {
     this.plexTVAuthToken = plexTVAuthToken;
     this.plexTVUserData = plexTVUserData;
     this.plexServers = plexServers;
-    this.plexLibraries = plexLibraries;
-    this.plexArtistLibraries = plexArtistLibraries;
-    this.plexAlbumLibraries = plexAlbumLibraries;
-    this.plexSongLibraries = plexSongLibraries;
-    this.plexMusicLibraries = plexMusicLibraries;
-    this.plexMovieLibraries = plexMovieLibraries;
-    this.plexTVShowLibraries = plexTVShowLibraries;
-    this.plexLibraryContent = plexLibraryContent;
-    this.plexMovieLibraryContent = plexMovieLibraryContent;
-    this.plexTVShowLibraryContent = plexTVShowLibraryContent;
     this.plexDevices = plexDevices;
+    this.plexLibraries = plexLibraries;
 
     this.plexClientInformation = {
       clientIdentifier: this.clientId, // This is a unique identifier used to identify your app with Plex. - If none is provided a new one is generated and saved locally
@@ -86,15 +62,6 @@ export class PlexAPIOAuth {
     this.plexTVUserData = {};
     this.plexServers = [];
     this.plexLibraries = [];
-    this.plexArtistLibraries = [];
-    this.plexAlbumLibraries = [];
-    this.plexSongLibraries = [];
-    this.plexMusicLibraries = [];
-    this.plexMovieLibraries = [];
-    this.plexTVShowLibraries = [];
-    this.plexLibraryContent = [];
-    this.plexMovieLibraryContent = [];
-    this.plexTVShowLibraryContent = [];
     this.plexDevices = [];
     this.plexClientInformation = {
       clientIdentifier: this.clientId, // This is a unique identifier used to identify your app with Plex. - If none is provided a new one is generated and saved locally
@@ -116,17 +83,9 @@ export class PlexAPIOAuth {
     plexTVAuthToken = "",
     plexTVUserData = {},
     plexServers = [],
+    plexDevices = [],
     plexLibraries = [],
     plexLibraryContent = [],
-    plexArtistLibraries = [],
-    plexAlbumLibraries = [],
-    plexSongLibraries = [],
-    plexMusicLibraries = [],
-    plexMovieLibraries = [],
-    plexTVShowLibraries = [],
-    plexMovieLibraryContent = [],
-    plexTVShowLibraryContent = [],
-    plexDevices = [],
   }) {
     this.plexTVAuthToken = plexTVAuthToken;
     this.plexTVUserData = plexTVUserData;
@@ -137,17 +96,8 @@ export class PlexAPIOAuth {
     this.forwardUrl = forwardUrl;
     this.platform = platform;
     this.plexServers = plexServers;
-    this.plexLibraries = plexLibraries;
-    this.plexArtistLibraries = plexArtistLibraries;
-    this.plexAlbumLibraries = plexAlbumLibraries;
-    this.plexSongLibraries = plexSongLibraries;
-    this.plexMusicLibraries = plexMusicLibraries;
-    this.plexMovieLibraries = plexMovieLibraries;
-    this.plexTVShowLibraries = plexTVShowLibraries;
-    this.plexLibraryContent = plexLibraryContent;
-    this.plexMovieLibraryContent = plexMovieLibraryContent;
-    this.plexTVShowLibraryContent = plexTVShowLibraryContent;
     this.plexDevices = plexDevices;
+    this.plexLibraries = plexLibraries;
     this.plexClientInformation = {
       clientIdentifier: this.clientId, // This is a unique identifier used to identify your app with Plex. - If none is provided a new one is generated and saved locally
       product: this.product, // Name of your application - Defaults to Plex-API-OAuth
@@ -159,43 +109,29 @@ export class PlexAPIOAuth {
   }
 
   SavePlexSession() {
-    console.log("Saving State:");
-    let sessionData = {
-      plexTVAuthToken: this.plexTVAuthToken,
-      plexTVUserData: this.plexTVUserData,
-      clientId: this.clientId,
-      product: this.product,
-      device: this.device,
-      version: this.version,
-      forwardUrl: this.forwardUrl,
-      platform: this.platform,
-      plexServers: this.plexServers,
-      plexLibraries: this.plexLibraries,
-      plexMusicLibraries: this.plexMusicLibraries,
-      plexArtistLibraries: this.plexArtistLibraries,
-      plexAlbumLibraries: this.plexAlbumLibraries,
-      plexSongLibraries: this.plexSongLibraries,
-      plexSeasonLibraries: this.plexSeasonLibraries,
-      plexEpisodeLibraries: this.plexEpisodeLibraries,
-      plexMovieLibraries: this.plexMovieLibraries,
-      plexTVShowLibraries: this.plexTVShowLibraries,
-      plexLibraryContent: this.plexLibraryContent,
-      plexMovieLibraryContent: this.plexMovieLibraryContent,
-      plexTVShowLibraryContent: this.plexTVShowLibraryContent,
-      plexDevices: this.plexDevices,
-      plexClientInformation: this.plexClientInformation,
-    };
-    console.log(sessionData);
-    window.localStorage.setItem("plexSessionData", JSON.stringify(sessionData));
+    window.localStorage.setItem(
+      "plexSessionData",
+      JSON.stringify({
+        plexTVAuthToken: this.plexTVAuthToken,
+        plexTVUserData: this.plexTVUserData,
+        clientId: this.clientId,
+        product: this.product,
+        device: this.device,
+        version: this.version,
+        forwardUrl: this.forwardUrl,
+        platform: this.platform,
+        plexServers: this.plexServers,
+        plexDevices: this.plexDevices,
+        plexLibraries: this.plexLibraries,
+        plexClientInformation: this.plexClientInformation,
+      })
+    );
   }
 
   LoadPlexSession() {
-    console.log("Loading State:");
-    let sessionData = JSON.parse(
-      window.localStorage?.getItem("plexSessionData") || "{}"
+    this.SetPlexSession(
+      JSON.parse(window.localStorage?.getItem("plexSessionData") || "{}")
     );
-    this.SetPlexSession(sessionData);
-    console.log(sessionData);
   }
 
   GenerateClientId() {
@@ -354,9 +290,10 @@ export class PlexAPIOAuth {
     return this.plexServers;
   }
 
-  async GetPlexLibraries() {
+  async GetPlexLibraries(servers) {
     let libraryArray = [];
-    for (const server of this.plexServers) {
+    servers = servers || this.plexServers;
+    for (const server of servers) {
       let response = await axios({
         method: "GET",
         url:
@@ -397,20 +334,157 @@ export class PlexAPIOAuth {
       }
     }
     this.plexLibraries = libraryArray;
-    this.plexMusicLibraries = libraryArray.filter(
-      (Obj) => Obj.type === "artist"
-    );
-    this.plexMovieLibraries = libraryArray.filter(
-      (Obj) => Obj.type === "movie"
-    );
-    this.plexTVShowLibraries = libraryArray.filter(
-      (Obj) => Obj.type === "show"
-    );
     return this.plexLibraries;
   }
 
-  async GetPlexMovieLibraryContent() {
+  async GetPlexMovieLibraries(servers) {
+    let libraryArray = [];
+    servers = servers || this.plexServers;
+    for (const server of servers) {
+      let response = await axios({
+        method: "GET",
+        url:
+          server.relayConnections[0].uri +
+          "/library/sections/?" +
+          qs.stringify({
+            "X-Plex-Token": server.accessToken,
+          }),
+        headers: { accept: "application/json" },
+      }).catch((err) => {
+        throw err;
+      });
+      for (const library of response.data.MediaContainer.Directory.filter(
+        (Obj) => Obj.type === "movie"
+      )) {
+        libraryArray.push({
+          server: server,
+          allowSync: library.allowSync,
+          art: library.art,
+          composite: library.composite,
+          filters: library.filters,
+          refreshing: library.refreshing,
+          thumb: library.thumb,
+          key: library.key,
+          type: library.type,
+          title: library.title,
+          agent: library.agent,
+          scanner: library.scanner,
+          language: library.language,
+          uuid: library.uuid,
+          updatedAt: library.updatedAt,
+          createdAt: library.createdAt,
+          scannedAt: library.scannedAt,
+          content: library.content,
+          directory: library.directory,
+          contentChangedAt: library.contentChangedAt,
+          hidden: library.hidden,
+          Location: library.Location,
+        });
+      }
+    }
+    return libraryArray;
+  }
+
+  async GetPlexMusicLibraries(servers) {
+    let libraryArray = [];
+    servers = servers || this.plexServers;
+    for (const server of servers) {
+      let response = await axios({
+        method: "GET",
+        url:
+          server.relayConnections[0].uri +
+          "/library/sections/?" +
+          qs.stringify({
+            "X-Plex-Token": server.accessToken,
+          }),
+        headers: { accept: "application/json" },
+      }).catch((err) => {
+        throw err;
+      });
+      for (const library of response.data.MediaContainer.Directory.filter(
+        (Obj) => Obj.type === "artist"
+      )) {
+        libraryArray.push({
+          server: server,
+          allowSync: library.allowSync,
+          art: library.art,
+          composite: library.composite,
+          filters: library.filters,
+          refreshing: library.refreshing,
+          thumb: library.thumb,
+          key: library.key,
+          type: library.type,
+          title: library.title,
+          agent: library.agent,
+          scanner: library.scanner,
+          language: library.language,
+          uuid: library.uuid,
+          updatedAt: library.updatedAt,
+          createdAt: library.createdAt,
+          scannedAt: library.scannedAt,
+          content: library.content,
+          directory: library.directory,
+          contentChangedAt: library.contentChangedAt,
+          hidden: library.hidden,
+          Location: library.Location,
+        });
+      }
+    }
+    return libraryArray;
+  }
+
+  async GetPlexTVShowLibraries(servers) {
+    let libraryArray = [];
+    servers = servers || this.plexServers;
+    for (const server of servers) {
+      let response = await axios({
+        method: "GET",
+        url:
+          server.relayConnections[0].uri +
+          "/library/sections/?" +
+          qs.stringify({
+            "X-Plex-Token": server.accessToken,
+          }),
+        headers: { accept: "application/json" },
+      }).catch((err) => {
+        throw err;
+      });
+      for (const library of response.data.MediaContainer.Directory.filter(
+        (Obj) => Obj.type === "show"
+      )) {
+        libraryArray.push({
+          server: server,
+          allowSync: library.allowSync,
+          art: library.art,
+          composite: library.composite,
+          filters: library.filters,
+          refreshing: library.refreshing,
+          thumb: library.thumb,
+          key: library.key,
+          type: library.type,
+          title: library.title,
+          agent: library.agent,
+          scanner: library.scanner,
+          language: library.language,
+          uuid: library.uuid,
+          updatedAt: library.updatedAt,
+          createdAt: library.createdAt,
+          scannedAt: library.scannedAt,
+          content: library.content,
+          directory: library.directory,
+          contentChangedAt: library.contentChangedAt,
+          hidden: library.hidden,
+          Location: library.Location,
+        });
+      }
+    }
+    return libraryArray;
+  }
+
+  async GetPlexMovies(servers, libraries, searchString) {
     let movieLibraryContent = [];
+    servers = servers || this.plexServers;
+    libraries = libraries || this.plexLibraries;
     for (const server of this.plexServers) {
       for (const library of this.plexLibraries.filter(
         (Obj) =>
@@ -426,6 +500,7 @@ export class PlexAPIOAuth {
             "/all?" +
             qs.stringify({
               type: 1,
+              title: searchString,
               "X-Plex-Token": server?.accessToken,
             }),
           headers: { accept: "application/json" },
@@ -470,6 +545,7 @@ export class PlexAPIOAuth {
     this.plexMovieLibraryContent = movieLibraryContent;
     return movieLibraryContent;
   }
+
   async GetPlexMusicLibraryContent() {
     let artistLibraryContent = [];
     let albumLibraryContent = [];
@@ -590,6 +666,7 @@ export class PlexAPIOAuth {
     this.plexSongLibraries = songLibraryContent;
     return artistLibraryContent;
   }
+
   async GetPlexTVShowLibraryContent() {
     let tvShowLibraryContent = [];
     let seasonLibraryContent = [];
@@ -697,16 +774,13 @@ export class PlexAPIOAuth {
     return tvShowLibraryContent;
   }
 
-  async GetPlexTVShowSeasons(server, searchString) {
+  async GetPlexTVShowSeasons(servers, libraries, searchString) {
     let responseArray = [];
-    let queryArray = this.plexServers;
-    if (server) {
-      queryArray = this.plexServers.filter((Obj) => (Obj = server));
-    }
-    if (searchString) {
-    }
-    for (const server of queryArray) {
-      for (const showLibrary of this.plexTVShowLibraries.filter(
+    servers = servers || this.plexServers;
+    libraries = libraries || this.plexLibraries;
+    searchString = searchString || "";
+    for (const server of servers) {
+      for (const showLibrary of libraries.filter(
         (Obj) => Obj.server.clientIdentifier === server.clientIdentifier
       )) {
         let response = await axios({
@@ -717,7 +791,7 @@ export class PlexAPIOAuth {
             showLibrary?.key +
             "/all?" +
             qs.stringify({
-              title: searchString || null,
+              title: searchString,
               type: 3,
               "X-Plex-Token": server?.accessToken,
             }),
