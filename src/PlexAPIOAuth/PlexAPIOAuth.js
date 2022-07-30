@@ -4,8 +4,11 @@ import axios from "axios";
 import qs from "qs";
 // import InfiniteScroll from "react-infinite-scroller";
 import { useState, useEffect } from "react";
+import { GeneratePlexClientInformation } from "..";
 
-export async function PlexLogin(plexClientInformation) {
+export async function PlexLogin(
+  plexClientInformation = GeneratePlexClientInformation()
+) {
   var plexOauth = new PlexOauth(plexClientInformation);
   let data = await plexOauth.requestHostedLoginURL().catch((err) => {
     throw err;
@@ -32,11 +35,17 @@ export async function PlexLogin(plexClientInformation) {
   } else {
     console.log("Plex Authentication Failed");
   }
-  return authToken;
+  return {
+    plexTVAuthToken: authToken,
+    plexClientInformation: plexClientInformation,
+  };
   // An auth token will only be null if the user never signs into the hosted UI, or you stop checking for a new one before they can log in
 }
 
-export async function GetPlexUserData(plexClientInformation, plexTVAuthToken) {
+export async function GetPlexUserData({
+  plexClientInformation,
+  plexTVAuthToken,
+}) {
   let response = await axios({
     method: "GET",
     url:
@@ -68,7 +77,10 @@ export async function GetPlexUserData(plexClientInformation, plexTVAuthToken) {
   }
 }
 
-export async function GetPlexDevices(plexClientInformation, plexAuthToken) {
+export async function GetPlexDevices({
+  plexClientInformation,
+  plexTVAuthToken,
+}) {
   let serverArray = [];
   let response = await axios({
     method: "GET",
@@ -89,7 +101,10 @@ export async function GetPlexDevices(plexClientInformation, plexAuthToken) {
   return response.data;
 }
 
-export async function GetPlexServers(plexClientInformation, plexTVAuthToken) {
+export async function GetPlexServers({
+  plexClientInformation,
+  plexTVAuthToken,
+}) {
   let serverArray = [];
   let response = await axios({
     method: "GET",
@@ -489,12 +504,7 @@ export async function GetPlexArtists(searchParams = {}, servers, libraries) {
   return artistLibraryContent;
 }
 
-export async function GetPlexAlbums(
-  searchParams = {},
-  servers,
-  libraries,
-  cancelToken
-) {
+export async function GetPlexAlbums(searchParams = {}, servers, libraries) {
   let albumLibraryContent = [];
   for (const server of servers) {
     let connectionUri = server.relayConnection;
@@ -769,7 +779,7 @@ export function fnBrowserDetect() {
   return browserName;
 }
 
-export function SavePlexSession(plexClientInformation, plexTVAuthToken) {
+export function SavePlexSession({ plexClientInformation, plexTVAuthToken }) {
   window.localStorage.setItem(
     "plexSessionData",
     JSON.stringify({
@@ -783,30 +793,13 @@ export function LoadPlexSession() {
   return JSON.parse(window.localStorage?.getItem("plexSessionData") || "{}");
 }
 
-export function GeneratePlexClientInformation(forwardUrl = "") {
-  if (typeof navigator !== "undefined") {
-    let plexClientInformation = {
-      clientIdentifier: v4(),
-      product: fnBrowserDetect(),
-      device: navigator.userAgentData.platform,
-      version: navigator.userAgentData.brands[0].version,
-      forwardUrl: forwardUrl,
-      platform: "Plex-API-OAuth",
-    };
-    console.log("Client Information generated successfully");
-    return plexClientInformation;
-  } else {
-    throw "Unable to detect Client";
-  }
-}
-
 export function CreatePlexClientInformation(
   clientIdentifier = v4(),
-  product = "Plex-API-OAuth",
-  device = "Web-Client",
-  version = "1",
+  product = fnBrowserDetect(),
+  device = navigator.userAgentData.platform,
+  version = navigator.userAgentData.brands[0].version,
   forwardUrl = "",
-  platform = "Web"
+  platform = "Plex-API-OAuth"
 ) {
   let plexClientInformation = {
     clientIdentifier: clientIdentifier,
@@ -839,13 +832,6 @@ export function GetLibraryPages(
     setItems([]);
   }, [query, libraryType]);
 
-  const [cancelToken, setCancelToken] = useState();
-
-  function getCancelToken(event) {
-    setCancelToken(event);
-    event.preventDefault();
-  }
-
   useEffect(() => {
     setLoading(true);
     setError(false);
@@ -863,60 +849,25 @@ export function GetLibraryPages(
 
     switch (libraryType) {
       case "artists":
-        data = GetPlexArtists(
-          searchParams,
-          servers,
-          libraries,
-          this.getCancelToken.bind(this)
-        );
+        data = GetPlexArtists(searchParams, servers, libraries);
         break;
       case "albums":
-        data = GetPlexAlbums(
-          searchParams,
-          servers,
-          libraries,
-          this.getCancelToken.bind(this)
-        );
+        data = GetPlexAlbums(searchParams, servers, libraries);
         break;
       case "songs":
-        data = GetPlexSongs(
-          searchParams,
-          servers,
-          libraries,
-          this.getCancelToken.bind(this)
-        );
+        data = GetPlexSongs(searchParams, servers, libraries);
         break;
       case "shows":
-        data = GetPlexShows(
-          searchParams,
-          servers,
-          libraries,
-          this.getCancelToken.bind(this)
-        );
+        data = GetPlexShows(searchParams, servers, libraries);
         break;
       case "seasons":
-        data = PlexSession.GetPlexSeasons(
-          searchParams,
-          servers,
-          libraries,
-          this.getCancelToken.bind(this)
-        );
+        data = GetPlexSeasons(searchParams, servers, libraries);
         break;
       case "episodes":
-        data = GetPlexEpisodes(
-          searchParams,
-          servers,
-          libraries,
-          this.getCancelToken.bind(this)
-        );
+        data = GetPlexEpisodes(searchParams, servers, libraries);
         break;
       case "movies":
-        data = GetPlexMovies(
-          searchParams,
-          servers,
-          libraries,
-          this.getCancelToken.bind(this)
-        );
+        data = GetPlexMovies(searchParams, servers, libraries);
         break;
     }
     try {
@@ -933,11 +884,6 @@ export function GetLibraryPages(
           setError(e);
         });
     } catch {}
-    return () => {
-      if (cancelToken) {
-        cancelToken();
-      }
-    };
-  }, [query, pageNumber]);
+  }, [query, pageNumber, libraryType]);
   return { loading, error, items, hasMore };
 }
