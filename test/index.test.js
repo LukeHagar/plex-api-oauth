@@ -29,7 +29,7 @@ describe("Unit Tests", function () {
   });
   it("Get Plex Servers", async function () {
     this.timeout(12000);
-    let response = await PlexSession.GetPlexServers({ owned: true });
+    let response = await PlexSession.GetPlexServers({}, { owned: true });
     assert.notEqual(PlexSession.plexServers, emptyArray);
     assert.notEqual(PlexSession.plexServers, null);
     assert.notEqual(PlexSession.plexServers, undefined);
@@ -39,8 +39,8 @@ describe("Unit Tests", function () {
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
-    //console.log("Plex Servers");
-    //console.log(PlexSession.plexServers);
+    // console.log("Plex Servers");
+    // console.log(PlexSession.plexServers);
   });
   it("Get Plex Libraries", async function () {
     this.timeout(10000);
@@ -83,7 +83,10 @@ describe("Unit Tests", function () {
   });
   it("Get Plex Movies", async function () {
     this.timeout(10000);
-    let response = await PlexSession.GetPlexMovies();
+    let response = await PlexSession.GetPlexMovies({
+      "X-Plex-Container-Start": 0,
+      "X-Plex-Container-Size": 2,
+    });
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
@@ -92,7 +95,10 @@ describe("Unit Tests", function () {
   });
   it("Get Plex Shows", async function () {
     this.timeout(10000);
-    let response = await PlexSession.GetPlexShows();
+    let response = await PlexSession.GetPlexShows({
+      "X-Plex-Container-Start": 0,
+      "X-Plex-Container-Size": 2,
+    });
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
@@ -101,7 +107,10 @@ describe("Unit Tests", function () {
   });
   it("Get Plex Seasons", async function () {
     this.timeout(10000);
-    let response = await PlexSession.GetPlexSeasons();
+    let response = await PlexSession.GetPlexSeasons({
+      "X-Plex-Container-Start": 0,
+      "X-Plex-Container-Size": 2,
+    });
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
@@ -110,7 +119,10 @@ describe("Unit Tests", function () {
   });
   it("Get Plex Episodes", async function () {
     this.timeout(20000);
-    let response = await PlexSession.GetPlexEpisodes();
+    let response = await PlexSession.GetPlexEpisodes({
+      "X-Plex-Container-Start": 0,
+      "X-Plex-Container-Size": 2,
+    });
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
@@ -119,7 +131,10 @@ describe("Unit Tests", function () {
   });
   it("Get Plex Artists", async function () {
     this.timeout(10000);
-    let response = await PlexSession.GetPlexArtists();
+    let response = await PlexSession.GetPlexArtists({
+      "X-Plex-Container-Start": 0,
+      "X-Plex-Container-Size": 2,
+    });
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
@@ -128,7 +143,10 @@ describe("Unit Tests", function () {
   });
   it("Get Plex Albums", async function () {
     this.timeout(10000);
-    let response = await PlexSession.GetPlexAlbums();
+    let response = await PlexSession.GetPlexAlbums({
+      "X-Plex-Container-Start": 0,
+      "X-Plex-Container-Size": 2,
+    });
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
@@ -137,11 +155,23 @@ describe("Unit Tests", function () {
   });
   it("Get Plex Songs", async function () {
     this.timeout(20000);
-    let response = await PlexSession.GetPlexSongs();
+    let response = await PlexSession.GetPlexSongs({
+      "X-Plex-Container-Start": 0,
+      "X-Plex-Container-Size": 2,
+    });
     assert.notEqual(response, emptyArray);
     assert.notEqual(response, null);
     assert.notEqual(response, undefined);
-    //console.log("Plex Songs");
+    // console.log("Plex Songs");
+    // console.log(response);
+  });
+  it("Get Plex Songs Paged", async function () {
+    this.timeout(20000);
+    let response = PlexSession.GetLibraryPages("songs");
+    assert.notEqual(response, emptyArray);
+    assert.notEqual(response, null);
+    assert.notEqual(response, undefined);
+    //console.log("Plex Songs Paged");
     //console.log(response);
   });
 });
