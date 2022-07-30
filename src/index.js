@@ -1,1 +1,22 @@
-export { PlexAPIOAuth } from "./PlexAPIOAuth/PlexAPIOAuth.js";
+export {
+  GeneratePlexClientInformation,
+  CreatePlexClientInformation,
+  PlexLogin,
+  GetPlexUserData,
+  GetPlexServers,
+  GetPlexMovies,
+  GetPlexShows,
+  GetPlexSeasons,
+  GetPlexEpisodes,
+  GetPlexMovieLibraries,
+  GetPlexMusicLibraries,
+  GetPlexTVShowLibraries,
+  GetPlexArtists,
+  GetPlexAlbums,
+  GetPlexSongs,
+  GetPlexLibraries,
+  GetPlexDevices,
+  GetLibraryPages,
+  LoadPlexSession,
+  SavePlexSession,
+} from "./PlexAPIOAuth/PlexAPIOAuth.js";
