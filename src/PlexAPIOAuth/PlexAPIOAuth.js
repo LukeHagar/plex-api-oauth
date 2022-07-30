@@ -185,7 +185,7 @@ export async function GetPlexServers({
   return serverArray;
 }
 
-export async function GetPlexLibraries(servers) {
+export async function GetPlexLibraries({servers}) {
   let libraryArray = [];
   if (typeof servers === Object) {
     console.log("Single Object Detected");
@@ -237,7 +237,7 @@ export async function GetPlexLibraries(servers) {
   return libraryArray;
 }
 
-export async function GetPlexMovieLibraries(servers) {
+export async function GetPlexMovieLibraries({servers}) {
   let libraryArray = [];
   for (const server of servers) {
     let connectionUri = server.relayConnection;
@@ -288,7 +288,7 @@ export async function GetPlexMovieLibraries(servers) {
   return libraryArray;
 }
 
-export async function GetPlexMusicLibraries(servers) {
+export async function GetPlexMusicLibraries({servers}) {
   let libraryArray = [];
   for (const server of servers) {
     let connectionUri = server.relayConnection;
@@ -339,7 +339,7 @@ export async function GetPlexMusicLibraries(servers) {
   return libraryArray;
 }
 
-export async function GetPlexTVShowLibraries(servers) {
+export async function GetPlexTVShowLibraries({servers}) {
   let libraryArray = [];
   for (const server of servers) {
     let connectionUri = server.relayConnection;
@@ -390,7 +390,7 @@ export async function GetPlexTVShowLibraries(servers) {
   return libraryArray;
 }
 
-export async function GetPlexMovies(searchParams = {}, servers, libraries) {
+export async function GetPlexMovies(searchParams = {}, {servers, libraries}) {
   let movieLibraryContent = [];
   for (const server of servers) {
     let connectionUri = server.relayConnection;
@@ -454,7 +454,7 @@ export async function GetPlexMovies(searchParams = {}, servers, libraries) {
   return movieLibraryContent;
 }
 
-export async function GetPlexArtists(searchParams = {}, servers, libraries) {
+export async function GetPlexArtists(searchParams = {}, {servers, libraries}) {
   let artistLibraryContent = [];
   for (const server of servers) {
     let connectionUri = server.relayConnection;
@@ -504,7 +504,7 @@ export async function GetPlexArtists(searchParams = {}, servers, libraries) {
   return artistLibraryContent;
 }
 
-export async function GetPlexAlbums(searchParams = {}, servers, libraries) {
+export async function GetPlexAlbums(searchParams = {}, {servers, libraries}) {
   let albumLibraryContent = [];
   for (const server of servers) {
     let connectionUri = server.relayConnection;
@@ -525,7 +525,6 @@ export async function GetPlexAlbums(searchParams = {}, servers, libraries) {
           ...searchParams,
           "X-Plex-Token": server.accessToken,
         },
-        cancelToken: axios.CancelToken((c) => this.props.getCancelToken(c)),
       }).catch((err) => {
         throw err;
       });
@@ -580,7 +579,6 @@ export async function GetPlexSongs(searchParams = {}, servers, libraries) {
           ...searchParams,
           "X-Plex-Token": server.accessToken,
         },
-        cancelToken: axios.CancelToken((c) => (cancelToken = c)),
       }).catch((err) => {
         if (axios.isCancel(err)) return;
         throw err;
@@ -646,7 +644,6 @@ export async function GetPlexShows(searchParams = {}, servers, libraries) {
           ...searchParams,
           "X-Plex-Token": server?.accessToken,
         },
-        cancelToken: axios.CancelToken((c) => (cancelToken = c)),
       }).catch((err) => {
         throw err;
       });
@@ -713,7 +710,6 @@ export async function GetPlexSeasons(searchParams = {}, servers, libraries) {
           ...searchParams,
           "X-Plex-Token": server?.accessToken,
         },
-        cancelToken: axios.CancelToken((c) => (cancelToken = c)),
       }).catch((err) => {
         throw err;
       });
@@ -747,7 +743,6 @@ export async function GetPlexEpisodes(searchParams = {}, servers, libraries) {
           ...searchParams,
           "X-Plex-Token": server?.accessToken,
         },
-        cancelToken: axios.CancelToken((c) => (cancelToken = c)),
       }).catch((err) => {
         throw err;
       });
@@ -814,8 +809,8 @@ export function CreatePlexClientInformation(
 }
 
 export function GetLibraryPages(
-  servers,
-  libraries,
+  {servers,
+  libraries,}
   libraryType = "",
   query = null,
   pageNumber = 0,
