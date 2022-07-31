@@ -4,11 +4,8 @@ import axios from "axios";
 import qs from "qs";
 // import InfiniteScroll from "react-infinite-scroller";
 import { useState, useEffect } from "react";
-import { GeneratePlexClientInformation } from "..";
 
-export async function PlexLogin(
-  plexClientInformation = GeneratePlexClientInformation()
-) {
+export async function PlexLogin(plexClientInformation) {
   var plexOauth = new PlexOauth(plexClientInformation);
   let data = await plexOauth.requestHostedLoginURL().catch((err) => {
     throw err;
@@ -16,8 +13,8 @@ export async function PlexLogin(
 
   let [hostedUILink, pinId] = data;
 
-  console.log("Plex Auth URL:");
-  console.log(hostedUILink); // UI URL used to log into Plex
+  console.debug("Plex Auth URL:");
+  console.debug(hostedUILink); // UI URL used to log into Plex
 
   if (typeof window !== "undefined") {
     window.open(hostedUILink, "_blank");
@@ -31,21 +28,15 @@ export async function PlexLogin(
     });
 
   if (authToken !== null) {
-    console.log("Plex Authentication Successful");
+    console.debug("Plex Authentication Successful");
   } else {
-    console.log("Plex Authentication Failed");
+    console.debug("Plex Authentication Failed");
   }
-  return {
-    plexTVAuthToken: authToken,
-    plexClientInformation: plexClientInformation,
-  };
+  return authToken;
   // An auth token will only be null if the user never signs into the hosted UI, or you stop checking for a new one before they can log in
 }
 
-export async function GetPlexUserData({
-  plexClientInformation,
-  plexTVAuthToken,
-}) {
+export async function GetPlexUserData(plexClientInformation, plexTVAuthToken) {
   let response = await axios({
     method: "GET",
     url:
@@ -58,15 +49,15 @@ export async function GetPlexUserData({
     headers: { accept: "application/json" },
   }).catch(function (error) {
     if (error.response) {
-      console.log(error.response.data);
-      console.log(error.response.status);
-      console.log(error.response.headers);
+      console.debug(error.response.data);
+      console.debug(error.response.status);
+      console.debug(error.response.headers);
     } else if (error.request) {
-      console.log(error.request);
+      console.debug(error.request);
     } else {
-      console.log("Error", error.message);
+      console.debug("Error", error.message);
     }
-    console.log(error.config);
+    console.debug(error.config);
   });
 
   if (response?.status === 200) {
@@ -77,10 +68,7 @@ export async function GetPlexUserData({
   }
 }
 
-export async function GetPlexDevices({
-  plexClientInformation,
-  plexTVAuthToken,
-}) {
+export async function GetPlexDevices(plexClientInformation, plexTVAuthToken) {
   let serverArray = [];
   let response = await axios({
     method: "GET",
@@ -101,10 +89,7 @@ export async function GetPlexDevices({
   return response.data;
 }
 
-export async function GetPlexServers({
-  plexClientInformation,
-  plexTVAuthToken,
-}) {
+export async function GetPlexServers(plexClientInformation, plexTVAuthToken) {
   let serverArray = [];
   let response = await axios({
     method: "GET",
@@ -185,12 +170,9 @@ export async function GetPlexServers({
   return serverArray;
 }
 
-export async function GetPlexLibraries({servers}) {
+export async function GetPlexLibraries(plexServers, plexLibraries) {
   let libraryArray = [];
-  if (typeof servers === Object) {
-    console.log("Single Object Detected");
-  }
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
@@ -237,9 +219,9 @@ export async function GetPlexLibraries({servers}) {
   return libraryArray;
 }
 
-export async function GetPlexMovieLibraries({servers}) {
+export async function GetPlexMovieLibraries(plexServers, plexLibraries) {
   let libraryArray = [];
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
@@ -288,9 +270,9 @@ export async function GetPlexMovieLibraries({servers}) {
   return libraryArray;
 }
 
-export async function GetPlexMusicLibraries({servers}) {
+export async function GetPlexMusicLibraries(plexServers, plexLibraries) {
   let libraryArray = [];
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
@@ -339,9 +321,9 @@ export async function GetPlexMusicLibraries({servers}) {
   return libraryArray;
 }
 
-export async function GetPlexTVShowLibraries({servers}) {
+export async function GetPlexTVShowLibraries(plexServers, plexLibraries) {
   let libraryArray = [];
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
@@ -390,14 +372,18 @@ export async function GetPlexTVShowLibraries({servers}) {
   return libraryArray;
 }
 
-export async function GetPlexMovies(searchParams = {}, {servers, libraries}) {
+export async function GetPlexMovies(
+  searchParams = {},
+  plexServers,
+  plexLibraries
+) {
   let movieLibraryContent = [];
   for (const server of servers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
     }
-    for (const library of libraries.filter(
+    for (const library of plexLibraries.filter(
       (Obj) =>
         Obj.server.clientIdentifier === server.clientIdentifier &&
         Obj.type === "movie"
@@ -410,12 +396,12 @@ export async function GetPlexMovies(searchParams = {}, {servers, libraries}) {
           ...searchParams,
           "X-Plex-Token": server?.accessToken,
         },
-        cancelToken: axios.CancelToken((c) => (cancelToken = c)),
         headers: { accept: "application/json" },
       }).catch((e) => {
         if (axios.isCancel(e)) return;
         throw e;
       });
+      console.debug(response.data);
       for (const data of response.data.MediaContainer.Metadata) {
         movieLibraryContent.push({
           server: server,
@@ -454,14 +440,18 @@ export async function GetPlexMovies(searchParams = {}, {servers, libraries}) {
   return movieLibraryContent;
 }
 
-export async function GetPlexArtists(searchParams = {}, {servers, libraries}) {
+export async function GetPlexArtists(
+  searchParams = {},
+  plexServers,
+  plexLibraries
+) {
   let artistLibraryContent = [];
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
     }
-    for (const library of libraries.filter(
+    for (const library of plexLibraries.filter(
       (Obj) =>
         Obj.server.clientIdentifier === server.clientIdentifier &&
         Obj.type === "artist"
@@ -475,10 +465,10 @@ export async function GetPlexArtists(searchParams = {}, {servers, libraries}) {
           ...searchParams,
           "X-Plex-Token": server.accessToken,
         },
-        cancelToken: axios.CancelToken((c) => (cancelToken = c)),
       }).catch((err) => {
         throw err;
       });
+      console.debug(response.data);
       for (const data of response.data.MediaContainer.Metadata) {
         artistLibraryContent.push({
           server: server,
@@ -504,14 +494,18 @@ export async function GetPlexArtists(searchParams = {}, {servers, libraries}) {
   return artistLibraryContent;
 }
 
-export async function GetPlexAlbums(searchParams = {}, {servers, libraries}) {
+export async function GetPlexAlbums(
+  searchParams = {},
+  plexServers,
+  plexLibraries
+) {
   let albumLibraryContent = [];
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
     }
-    for (const library of libraries.filter(
+    for (const library of plexLibraries.filter(
       (Obj) =>
         Obj.server.clientIdentifier === server.clientIdentifier &&
         Obj.type === "artist"
@@ -528,6 +522,7 @@ export async function GetPlexAlbums(searchParams = {}, {servers, libraries}) {
       }).catch((err) => {
         throw err;
       });
+      console.debug(response.data);
       for (const data of response.data.MediaContainer.Metadata) {
         albumLibraryContent.push({
           server: server,
@@ -558,14 +553,18 @@ export async function GetPlexAlbums(searchParams = {}, {servers, libraries}) {
   return albumLibraryContent;
 }
 
-export async function GetPlexSongs(searchParams = {}, servers, libraries) {
+export async function GetPlexSongs(
+  searchParams = {},
+  plexServers,
+  plexLibraries
+) {
   let songLibraryContent = [];
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
     }
-    for (const library of libraries.filter(
+    for (const library of plexLibraries.filter(
       (Obj) =>
         Obj.server.clientIdentifier === server.clientIdentifier &&
         Obj.type === "artist"
@@ -583,8 +582,9 @@ export async function GetPlexSongs(searchParams = {}, servers, libraries) {
         if (axios.isCancel(err)) return;
         throw err;
       });
-      console.log(response);
+      console.debug(response);
       try {
+        console.debug(response.data);
         for (const data of response.data.MediaContainer.Metadata) {
           songLibraryContent.push({
             server: server,
@@ -622,14 +622,18 @@ export async function GetPlexSongs(searchParams = {}, servers, libraries) {
   return songLibraryContent;
 }
 
-export async function GetPlexShows(searchParams = {}, servers, libraries) {
+export async function GetPlexShows(
+  searchParams = {},
+  plexServers,
+  plexLibraries
+) {
   let tvShowLibraryContent = [];
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
     }
-    for (const showLibrary of libraries.filter(
+    for (const showLibrary of plexLibraries.filter(
       (Obj) =>
         Obj.server.clientIdentifier === server.clientIdentifier &&
         Obj.type === "show"
@@ -647,6 +651,7 @@ export async function GetPlexShows(searchParams = {}, servers, libraries) {
       }).catch((err) => {
         throw err;
       });
+      console.debug(response.data);
       for (const data of response.data.MediaContainer.Metadata) {
         tvShowLibraryContent.push({
           server: server,
@@ -688,14 +693,18 @@ export async function GetPlexShows(searchParams = {}, servers, libraries) {
   return tvShowLibraryContent;
 }
 
-export async function GetPlexSeasons(searchParams = {}, servers, libraries) {
+export async function GetPlexSeasons(
+  searchParams = {},
+  plexServers,
+  plexLibraries
+) {
   let seasonArray = [];
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
     }
-    for (const showLibrary of libraries.filter(
+    for (const showLibrary of plexLibraries.filter(
       (Obj) =>
         Obj.server.clientIdentifier === server.clientIdentifier &&
         Obj.type === "show"
@@ -721,14 +730,18 @@ export async function GetPlexSeasons(searchParams = {}, servers, libraries) {
   return seasonArray;
 }
 
-export async function GetPlexEpisodes(searchParams = {}, servers, libraries) {
+export async function GetPlexEpisodes(
+  searchParams = {},
+  plexServers,
+  plexLibraries
+) {
   let episodeLibrary = [];
-  for (const server of servers) {
+  for (const server of plexServers) {
     let connectionUri = server.relayConnection;
     if (server.localConnection) {
       connectionUri = server.localConnection;
     }
-    for (const showLibrary of libraries.filter(
+    for (const showLibrary of plexLibraries.filter(
       (Obj) =>
         Obj.server.clientIdentifier === server.clientIdentifier &&
         Obj.type === "show"
@@ -754,7 +767,7 @@ export async function GetPlexEpisodes(searchParams = {}, servers, libraries) {
   return episodeLibrary;
 }
 
-export function fnBrowserDetect() {
+export function FnBrowserDetect() {
   let userAgent = navigator.userAgent;
   let browserName;
 
@@ -774,9 +787,9 @@ export function fnBrowserDetect() {
   return browserName;
 }
 
-export function SavePlexSession({ plexClientInformation, plexTVAuthToken }) {
+export function SavePlexSession(plexClientInformation, plexTVAuthToken) {
   window.localStorage.setItem(
-    "plexSessionData",
+    "plexServers, plexLibraries",
     JSON.stringify({
       plexClientInformation: plexClientInformation,
       plexTVAuthToken: plexTVAuthToken,
@@ -785,12 +798,14 @@ export function SavePlexSession({ plexClientInformation, plexTVAuthToken }) {
 }
 
 export function LoadPlexSession() {
-  return JSON.parse(window.localStorage?.getItem("plexSessionData") || "{}");
+  return JSON.parse(
+    window.localStorage?.getItem("plexServers, plexLibraries") || "{}"
+  );
 }
 
 export function CreatePlexClientInformation(
   clientIdentifier = v4(),
-  product = fnBrowserDetect(),
+  product = FnBrowserDetect(),
   device = navigator.userAgentData.platform,
   version = navigator.userAgentData.brands[0].version,
   forwardUrl = "",
@@ -804,81 +819,56 @@ export function CreatePlexClientInformation(
     forwardUrl: forwardUrl,
     platform: platform,
   };
-  console.log("Client Information generated successfully");
+  console.debug("Client Information generated successfully");
   return plexClientInformation;
 }
 
-export function GetLibraryPages(
-  {servers,
-  libraries,}
+export async function GetLibraryPages(
+  plexServers,
+  plexLibraries,
   libraryType = "",
-  query = null,
   pageNumber = 0,
   chunkSize = 50
 ) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [items, setItems] = useState([]);
-  const [hasMore, setHasMore] = useState(false);
-
   let data = null;
+  let items = [];
+  let hasMore = false;
 
-  useEffect(() => {
-    setItems([]);
-  }, [query, libraryType]);
+  let searchParams = {
+    "X-Plex-Container-Start": pageNumber * chunkSize,
+    "X-Plex-Container-Size": chunkSize,
+  };
 
-  useEffect(() => {
-    setLoading(true);
-    setError(false);
-    let searchParams = {
-      "X-Plex-Container-Start": pageNumber * chunkSize,
-      "X-Plex-Container-Size": chunkSize,
-    };
-    if (query !== null) {
-      searchParams = {
-        title: query,
-        "X-Plex-Container-Start": pageNumber * chunkSize,
-        "X-Plex-Container-Size": chunkSize,
-      };
-    }
+  console.debug(searchParams);
 
-    switch (libraryType) {
-      case "artists":
-        data = GetPlexArtists(searchParams, servers, libraries);
-        break;
-      case "albums":
-        data = GetPlexAlbums(searchParams, servers, libraries);
-        break;
-      case "songs":
-        data = GetPlexSongs(searchParams, servers, libraries);
-        break;
-      case "shows":
-        data = GetPlexShows(searchParams, servers, libraries);
-        break;
-      case "seasons":
-        data = GetPlexSeasons(searchParams, servers, libraries);
-        break;
-      case "episodes":
-        data = GetPlexEpisodes(searchParams, servers, libraries);
-        break;
-      case "movies":
-        data = GetPlexMovies(searchParams, servers, libraries);
-        break;
-    }
-    try {
-      data
-        .then((finalData) => {
-          setItems((previousData) => {
-            return [...previousData, ...finalData];
-          });
-          setHasMore(finalData.length > 0);
-          setLoading(false);
-          console.log({ loading, error, items, hasMore });
-        })
-        .catch((e) => {
-          setError(e);
-        });
-    } catch {}
-  }, [query, pageNumber, libraryType]);
-  return { loading, error, items, hasMore };
+  switch (libraryType) {
+    case "artists":
+      data = await GetPlexArtists(searchParams, plexServers, plexLibraries);
+      break;
+    case "albums":
+      data = await GetPlexAlbums(searchParams, plexServers, plexLibraries);
+      break;
+    case "songs":
+      data = await GetPlexSongs(searchParams, plexServers, plexLibraries);
+      break;
+    case "shows":
+      data = await GetPlexShows(searchParams, plexServers, plexLibraries);
+      break;
+    case "seasons":
+      data = await GetPlexSeasons(searchParams, plexServers, plexLibraries);
+      break;
+    case "episodes":
+      data = await GetPlexEpisodes(searchParams, plexServers, plexLibraries);
+      break;
+    case "movies":
+      data = await GetPlexMovies(searchParams, plexServers, plexLibraries);
+      break;
+  }
+  console.debug(data);
+  if (data !== null) {
+    items = data;
+    hasMore = data.length > 0;
+    console.debug({ items, hasMore });
+  }
+  return { items, hasMore };
 }

@@ -1,5 +1,4 @@
 export {
-  GeneratePlexClientInformation,
   CreatePlexClientInformation,
   PlexLogin,
   GetPlexUserData,
