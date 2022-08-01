@@ -2,7 +2,6 @@ import { PlexOauth } from "plex-oauth";
 import { v4 } from "uuid";
 import axios from "axios";
 import qs from "qs";
-// import InfiniteScroll from "react-infinite-scroller";
 import { useState, useEffect } from "react";
 
 export async function PlexLogin(plexClientInformation) {
@@ -865,10 +864,13 @@ export async function GetLibraryPages(
       break;
   }
   console.debug(data);
-  if (data !== null) {
+  try {
     items = data;
-    hasMore = data.length > 0;
+    hasMore = data.length === chunkSize;
     console.debug({ items, hasMore });
+  } catch {
+    items = [];
+    hasMore = false;
   }
   return { items, hasMore };
 }
