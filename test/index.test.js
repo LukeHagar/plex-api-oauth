@@ -1,7 +1,6 @@
 import { strict as assert } from "assert";
 import {
   CreatePlexClientInformation,
-  GeneratePlexClientInformation,
   PlexLogin,
   GetPlexUserData,
 } from "../src/index.js";

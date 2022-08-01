@@ -2,7 +2,6 @@ import { PlexOauth } from "plex-oauth";
 import { v4 } from "uuid";
 import axios from "axios";
 import qs from "qs";
-import { useState, useEffect } from "react";
 
 export async function PlexLogin(plexClientInformation) {
   var plexOauth = new PlexOauth(plexClientInformation);
@@ -172,14 +171,10 @@ export async function GetPlexServers(plexClientInformation, plexTVAuthToken) {
 export async function GetPlexLibraries(plexServers, plexLibraries) {
   let libraryArray = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     let response = await axios({
       method: "GET",
       url:
-        connectionUri.uri +
+        server.preferredConnection.uri +
         "/library/sections/?" +
         qs.stringify({
           "X-Plex-Token": server.accessToken,
@@ -190,13 +185,23 @@ export async function GetPlexLibraries(plexServers, plexLibraries) {
     });
     for (const library of response.data.MediaContainer.Directory) {
       libraryArray.push({
-        server: server,
+        server: server.clientIdentifier,
         allowSync: library.allowSync,
         art: library.art,
         composite: library.composite,
         filters: library.filters,
         refreshing: library.refreshing,
-        thumb: library.thumb,
+        thumb:
+          server.preferredConnection.uri +
+          "/photo/:/transcode?" +
+          qs.stringify({
+            width: 240,
+            height: 240,
+            minSize: 1,
+            upscale: 1,
+            url: library.thumb + "?X-Plex-Token=" + server.accessToken,
+            "X-Plex-Token": server.accessToken,
+          }),
         key: library.key,
         type: library.type,
         title: library.title,
@@ -221,14 +226,10 @@ export async function GetPlexLibraries(plexServers, plexLibraries) {
 export async function GetPlexMovieLibraries(plexServers, plexLibraries) {
   let libraryArray = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     let response = await axios({
       method: "GET",
       url:
-        connectionUri.uri +
+        server.preferredConnection.uri +
         "/library/sections/?" +
         qs.stringify({
           "X-Plex-Token": server.accessToken,
@@ -247,7 +248,17 @@ export async function GetPlexMovieLibraries(plexServers, plexLibraries) {
         composite: library.composite,
         filters: library.filters,
         refreshing: library.refreshing,
-        thumb: library.thumb,
+        thumb:
+          server.preferredConnection.uri +
+          "/photo/:/transcode?" +
+          qs.stringify({
+            width: 240,
+            height: 240,
+            minSize: 1,
+            upscale: 1,
+            url: library.thumb + "?X-Plex-Token=" + server.accessToken,
+            "X-Plex-Token": server.accessToken,
+          }),
         key: library.key,
         type: library.type,
         title: library.title,
@@ -272,14 +283,10 @@ export async function GetPlexMovieLibraries(plexServers, plexLibraries) {
 export async function GetPlexMusicLibraries(plexServers, plexLibraries) {
   let libraryArray = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     let response = await axios({
       method: "GET",
       url:
-        connectionUri.uri +
+        server.preferredConnection.uri +
         "/library/sections/?" +
         qs.stringify({
           "X-Plex-Token": server.accessToken,
@@ -298,7 +305,17 @@ export async function GetPlexMusicLibraries(plexServers, plexLibraries) {
         composite: library.composite,
         filters: library.filters,
         refreshing: library.refreshing,
-        thumb: library.thumb,
+        thumb:
+          server.preferredConnection.uri +
+          "/photo/:/transcode?" +
+          qs.stringify({
+            width: 240,
+            height: 240,
+            minSize: 1,
+            upscale: 1,
+            url: library.thumb + "?X-Plex-Token=" + server.accessToken,
+            "X-Plex-Token": server.accessToken,
+          }),
         key: library.key,
         type: library.type,
         title: library.title,
@@ -323,14 +340,10 @@ export async function GetPlexMusicLibraries(plexServers, plexLibraries) {
 export async function GetPlexTVShowLibraries(plexServers, plexLibraries) {
   let libraryArray = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     let response = await axios({
       method: "GET",
       url:
-        connectionUri.uri +
+        server.preferredConnection.uri +
         "/library/sections/?" +
         qs.stringify({
           "X-Plex-Token": server.accessToken,
@@ -349,7 +362,17 @@ export async function GetPlexTVShowLibraries(plexServers, plexLibraries) {
         composite: library.composite,
         filters: library.filters,
         refreshing: library.refreshing,
-        thumb: library.thumb,
+        thumb:
+          server.preferredConnection.uri +
+          "/photo/:/transcode?" +
+          qs.stringify({
+            width: 240,
+            height: 240,
+            minSize: 1,
+            upscale: 1,
+            url: library.thumb + "?X-Plex-Token=" + server.accessToken,
+            "X-Plex-Token": server.accessToken,
+          }),
         key: library.key,
         type: library.type,
         title: library.title,
@@ -377,19 +400,17 @@ export async function GetPlexMovies(
   plexLibraries
 ) {
   let movieLibraryContent = [];
-  for (const server of servers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
+  for (const server of plexServers) {
     for (const library of plexLibraries.filter(
-      (Obj) =>
-        Obj.server.clientIdentifier === server.clientIdentifier &&
-        Obj.type === "movie"
+      (Obj) => Obj.server === server.clientIdentifier && Obj.type === "movie"
     )) {
       let response = await axios({
         method: "GET",
-        url: connectionUri.uri + "/library/sections/" + library?.key + "/all",
+        url:
+          server.preferredConnection.uri +
+          "/library/sections/" +
+          library?.key +
+          "/all",
         params: {
           type: 1,
           ...searchParams,
@@ -403,8 +424,8 @@ export async function GetPlexMovies(
       console.debug(response.data);
       for (const data of response.data.MediaContainer.Metadata) {
         movieLibraryContent.push({
-          server: server,
-          library: library,
+          server: server.clientIdentifier,
+          library: library.uuid,
           ratingKey: data.ratingKey,
           key: data.key,
           guid: data.guid,
@@ -417,7 +438,17 @@ export async function GetPlexMovies(
           audienceRating: data.audienceRating,
           year: data.year,
           tagline: data.tagline,
-          thumb: data.thumb,
+          thumb:
+            server.preferredConnection.uri +
+            "/photo/:/transcode?" +
+            qs.stringify({
+              width: 240,
+              height: 240,
+              minSize: 1,
+              upscale: 1,
+              url: data.thumb + "?X-Plex-Token=" + server.accessToken,
+              "X-Plex-Token": server.accessToken,
+            }),
           art: data.art,
           duration: data.duration,
           originallyAvailableAt: data.originallyAvailableAt,
@@ -446,18 +477,16 @@ export async function GetPlexArtists(
 ) {
   let artistLibraryContent = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     for (const library of plexLibraries.filter(
-      (Obj) =>
-        Obj.server.clientIdentifier === server.clientIdentifier &&
-        Obj.type === "artist"
+      (Obj) => Obj.server === server.clientIdentifier && Obj.type === "artist"
     )) {
       let response = await axios({
         method: "GET",
-        url: connectionUri.uri + "/library/sections/" + library?.key + "/all",
+        url:
+          server.preferredConnection.uri +
+          "/library/sections/" +
+          library?.key +
+          "/all",
         headers: { accept: "application/json" },
         params: {
           type: 8,
@@ -470,8 +499,8 @@ export async function GetPlexArtists(
       console.debug(response.data);
       for (const data of response.data.MediaContainer.Metadata) {
         artistLibraryContent.push({
-          server: server,
-          library: library,
+          server: server.clientIdentifier,
+          library: library.uuid,
           ratingKey: data.ratingKey,
           key: data.key,
           guid: data.guid,
@@ -479,7 +508,17 @@ export async function GetPlexArtists(
           title: data.title,
           summary: data.summary,
           index: data.index,
-          thumb: data.thumb,
+          thumb:
+            server.preferredConnection.uri +
+            "/photo/:/transcode?" +
+            qs.stringify({
+              width: 240,
+              height: 240,
+              minSize: 1,
+              upscale: 1,
+              url: data.thumb + "?X-Plex-Token=" + server.accessToken,
+              "X-Plex-Token": server.accessToken,
+            }),
           art: data.art,
           addedAt: data.addedAt,
           updatedAt: data.updatedAt,
@@ -500,18 +539,16 @@ export async function GetPlexAlbums(
 ) {
   let albumLibraryContent = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     for (const library of plexLibraries.filter(
-      (Obj) =>
-        Obj.server.clientIdentifier === server.clientIdentifier &&
-        Obj.type === "artist"
+      (Obj) => Obj.server === server.clientIdentifier && Obj.type === "artist"
     )) {
       let response = await axios({
         method: "GET",
-        url: connectionUri.uri + "/library/sections/" + library?.key + "/all",
+        url:
+          server.preferredConnection.uri +
+          "/library/sections/" +
+          library?.key +
+          "/all",
         headers: { accept: "application/json" },
         params: {
           type: 9,
@@ -524,8 +561,8 @@ export async function GetPlexAlbums(
       console.debug(response.data);
       for (const data of response.data.MediaContainer.Metadata) {
         albumLibraryContent.push({
-          server: server,
-          library: library,
+          server: server.clientIdentifier,
+          library: library.uuid,
           addedAt: data.addedAt,
           guid: data.guid,
           index: data.index,
@@ -540,7 +577,17 @@ export async function GetPlexAlbums(
           parentTitle: data.parentTitle,
           ratingKey: data.ratingKey,
           summary: data.summary,
-          thumb: data.thumb,
+          thumb:
+            server.preferredConnection.uri +
+            "/photo/:/transcode?" +
+            qs.stringify({
+              width: 240,
+              height: 240,
+              minSize: 1,
+              upscale: 1,
+              url: data.thumb + "?X-Plex-Token=" + server.accessToken,
+              "X-Plex-Token": server.accessToken,
+            }),
           title: data.title,
           type: data.type,
           updatedAt: data.updatedAt,
@@ -559,18 +606,16 @@ export async function GetPlexSongs(
 ) {
   let songLibraryContent = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     for (const library of plexLibraries.filter(
-      (Obj) =>
-        Obj.server.clientIdentifier === server.clientIdentifier &&
-        Obj.type === "artist"
+      (Obj) => Obj.server === server.clientIdentifier && Obj.type === "artist"
     )) {
       let response = await axios({
         method: "GET",
-        url: connectionUri.uri + "/library/sections/" + library?.key + "/all",
+        url:
+          server.preferredConnection.uri +
+          "/library/sections/" +
+          library?.key +
+          "/all",
         headers: { accept: "application/json" },
         params: {
           type: 10,
@@ -605,7 +650,17 @@ export async function GetPlexSongs(
             summary: data.summary,
             index: data.index,
             parentIndex: data.parentIndex,
-            thumb: data.thumb,
+            thumb:
+              server.preferredConnection.uri +
+              "/photo/:/transcode?" +
+              qs.stringify({
+                width: 240,
+                height: 240,
+                minSize: 1,
+                upscale: 1,
+                url: data.thumb + "?X-Plex-Token=" + server.accessToken,
+                "X-Plex-Token": server.accessToken,
+              }),
             parentThumb: data.parentThumb,
             grandparentThumb: data.grandparentThumb,
             duration: data.duration,
@@ -628,19 +683,16 @@ export async function GetPlexShows(
 ) {
   let tvShowLibraryContent = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     for (const showLibrary of plexLibraries.filter(
-      (Obj) =>
-        Obj.server.clientIdentifier === server.clientIdentifier &&
-        Obj.type === "show"
+      (Obj) => Obj.server === server.clientIdentifier && Obj.type === "show"
     )) {
       let response = await axios({
         method: "GET",
         url:
-          connectionUri.uri + "/library/sections/" + showLibrary?.key + "/all",
+          server.preferredConnection.uri +
+          "/library/sections/" +
+          showLibrary?.key +
+          "/all",
         headers: { accept: "application/json" },
         params: {
           type: 2,
@@ -668,7 +720,17 @@ export async function GetPlexShows(
           audienceRating: data.audienceRating,
           year: data.year,
           tagline: data.tagline,
-          thumb: data.thumb,
+          thumb:
+            server.preferredConnection.uri +
+            "/photo/:/transcode?" +
+            qs.stringify({
+              width: 240,
+              height: 240,
+              minSize: 1,
+              upscale: 1,
+              url: data.thumb + "?X-Plex-Token=" + server.accessToken,
+              "X-Plex-Token": server.accessToken,
+            }),
           art: data.art,
           theme: data.theme,
           duration: data.duration,
@@ -699,19 +761,16 @@ export async function GetPlexSeasons(
 ) {
   let seasonArray = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     for (const showLibrary of plexLibraries.filter(
-      (Obj) =>
-        Obj.server.clientIdentifier === server.clientIdentifier &&
-        Obj.type === "show"
+      (Obj) => Obj.server === server.clientIdentifier && Obj.type === "show"
     )) {
       let response = await axios({
         method: "GET",
         url:
-          connectionUri.uri + "/library/sections/" + showLibrary?.key + "/all",
+          server.preferredConnection.uri +
+          "/library/sections/" +
+          showLibrary?.key +
+          "/all",
         headers: { accept: "application/json" },
         params: {
           type: 3,
@@ -736,19 +795,16 @@ export async function GetPlexEpisodes(
 ) {
   let episodeLibrary = [];
   for (const server of plexServers) {
-    let connectionUri = server.relayConnection;
-    if (server.localConnection) {
-      connectionUri = server.localConnection;
-    }
     for (const showLibrary of plexLibraries.filter(
-      (Obj) =>
-        Obj.server.clientIdentifier === server.clientIdentifier &&
-        Obj.type === "show"
+      (Obj) => Obj.server === server.clientIdentifier && Obj.type === "show"
     )) {
       let response = await axios({
         method: "GET",
         url:
-          connectionUri.uri + "/library/sections/" + showLibrary?.key + "/all",
+          server.preferredConnection.uri +
+          "/library/sections/" +
+          showLibrary?.key +
+          "/all",
         headers: { accept: "application/json" },
         params: {
           type: 4,
@@ -873,4 +929,136 @@ export async function GetLibraryPages(
     hasMore = false;
   }
   return { items, hasMore };
+}
+
+export async function GetMusicHub(
+  plexClientinformation,
+  plexServers,
+  plexLibraries
+) {
+  let hubs = [];
+  for (const server of plexServers) {
+    for (const musicLibrary of plexLibraries.filter(
+      (Obj) => Obj.server === server.clientIdentifier && Obj.type === "artist"
+    )) {
+      let response = await axios({
+        method: "GET",
+        url:
+          server.preferredConnection.uri +
+          "/hubs/sections/" +
+          musicLibrary?.key,
+        headers: { accept: "application/json" },
+        params: {
+          count: 12,
+          includeLibraryPlaylists: 1,
+          includeStations: 1,
+          includeRecentChannels: 1,
+          includeMeta: 1,
+          includeExternalMetadata: 1,
+          excludeFields: "summary",
+          "X-Plex-Product": plexClientinformation.product,
+          "X-Plex-Version": plexClientinformation.version,
+          "X-Plex-Client-Identifier": plexClientinformation.clientIdentifier,
+          "X-Plex-Token": server?.accessToken,
+        },
+      }).catch((err) => {
+        throw err;
+      });
+      console.debug(response.data);
+
+      for (const hub of response.data.MediaContainer.Hub) {
+        let hubMetaData = [];
+        if (hub.size > 1) {
+          for (const metaDataEntry of hub.Metadata) {
+            let metaEntry = {
+              Genre: metaDataEntry.Genre,
+              addedAt: metaDataEntry.addedAt,
+              guid: metaDataEntry.guid,
+              index: metaDataEntry.index,
+              key: metaDataEntry.key,
+              librarySectionID: metaDataEntry.librarySectionID,
+              librarySectionKey: metaDataEntry.librarySectionKey,
+              librarySectionTitle: metaDataEntry.librarySectionTitle,
+              loudnessAnalysisVersion: metaDataEntry.loudnessAnalysisVersion,
+              musicAnalysisVersion: metaDataEntry.musicAnalysisVersion,
+              originallyAvailableAt: metaDataEntry.originallyAvailableAt,
+              parentGuid: metaDataEntry.parentGuid,
+              parentKey: metaDataEntry.parentKey,
+              parentRatingKey: metaDataEntry.parentRatingKey,
+              parentThumb: metaDataEntry.parentThumb,
+              parentTitle: metaDataEntry.parentTitle,
+              ratingKey: metaDataEntry.ratingKey,
+              studio: metaDataEntry.studio,
+              thumb:
+                server.preferredConnection.uri +
+                "/photo/:/transcode?" +
+                qs.stringify({
+                  width: 240,
+                  height: 240,
+                  minSize: 1,
+                  upscale: 1,
+                  url:
+                    metaDataEntry.thumb + "?X-Plex-Token=" + server.accessToken,
+                  "X-Plex-Token": server.accessToken,
+                }),
+              title: metaDataEntry.title,
+              type: metaDataEntry.type,
+              updatedAt: metaDataEntry.updatedAt,
+              year: metaDataEntry.year,
+            };
+            if (metaDataEntry.type === "playlist") {
+              metaEntry = {
+                addedAt: metaDataEntry.addedAt,
+                thumb:
+                  server.preferredConnection.uri +
+                  "/photo/:/transcode?" +
+                  qs.stringify({
+                    width: 240,
+                    height: 240,
+                    minSize: 1,
+                    upscale: 1,
+                    url:
+                      metaDataEntry.composite +
+                      "?X-Plex-Token=" +
+                      server.accessToken,
+                    "X-Plex-Token": server.accessToken,
+                  }),
+                duration: metaDataEntry.duration,
+                guid: metaDataEntry.guid,
+                icon: metaDataEntry.icon,
+                key: metaDataEntry.key,
+                lastViewedAt: metaDataEntry.lastViewedAt,
+                leafCount: metaDataEntry.leafCount,
+                playlistType: metaDataEntry.playlistType,
+                ratingKey: metaDataEntry.ratingKey,
+                smart: metaDataEntry.smart,
+                title: metaDataEntry.title,
+                titleSort: metaDataEntry.titleSort,
+                type: metaDataEntry.type,
+                updatedAt: metaDataEntry.updatedAt,
+                viewCount: metaDataEntry.viewCount,
+              };
+            }
+            if (metaDataEntry.type !== "station") {
+              hubMetaData.push(metaEntry);
+            }
+          }
+        }
+        hubs.push({
+          Metadata: hubMetaData,
+          context: hub.context,
+          hubIdentifier: hub.hubIdentifier,
+          hubKey: hub.hubKey,
+          key: hub.key,
+          more: hub.more,
+          promoted: hub.promoted || null,
+          size: hub.size,
+          style: hub.style,
+          title: hub.title,
+          type: hub.type,
+        });
+      }
+    }
+  }
+  return hubs;
 }
