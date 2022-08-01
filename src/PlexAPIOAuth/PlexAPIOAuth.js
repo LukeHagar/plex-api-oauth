@@ -968,7 +968,7 @@ export async function GetMusicHub(
 
       for (const hub of response.data.MediaContainer.Hub) {
         let hubMetaData = [];
-        if (hub.size > 1) {
+        if (hub.size > 1 && hub.type !== "station") {
           for (const metaDataEntry of hub.Metadata) {
             let metaEntry = {
               Genre: metaDataEntry.Genre,
@@ -1039,24 +1039,23 @@ export async function GetMusicHub(
                 viewCount: metaDataEntry.viewCount,
               };
             }
-            if (metaDataEntry.type !== "station") {
-              hubMetaData.push(metaEntry);
-            }
+
+            hubMetaData.push(metaEntry);
           }
+          hubs.push({
+            Metadata: hubMetaData,
+            context: hub.context,
+            hubIdentifier: hub.hubIdentifier,
+            hubKey: hub.hubKey,
+            key: hub.key,
+            more: hub.more,
+            promoted: hub.promoted || null,
+            size: hub.size,
+            style: hub.style,
+            title: hub.title,
+            type: hub.type,
+          });
         }
-        hubs.push({
-          Metadata: hubMetaData,
-          context: hub.context,
-          hubIdentifier: hub.hubIdentifier,
-          hubKey: hub.hubKey,
-          key: hub.key,
-          more: hub.more,
-          promoted: hub.promoted || null,
-          size: hub.size,
-          style: hub.style,
-          title: hub.title,
-          type: hub.type,
-        });
       }
     }
   }
