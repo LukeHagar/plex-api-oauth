@@ -1061,3 +1061,158 @@ export async function GetMusicHub(
   }
   return hubs;
 }
+
+export async function GetArtistPage(
+  plexClientInformation,
+  plexServers,
+  plexLibraries,
+  artistObject
+) {
+  let albums = [];
+  let response = {};
+  let songs = [];
+  for (const server of plexServers.filter(
+    (Obj) => Obj.clientIdentifier === artistObject.server
+  )) {
+    for (const musicLibrary of plexLibraries.filter(
+      (Obj) =>
+        Obj.server === server.clientIdentifier &&
+        Obj.type === "artist" &&
+        Obj.uuid === artistObject.library
+    )) {
+      response = await axios({
+        method: "GET",
+        url:
+          server.preferredConnection.uri +
+          "/library/metadata/" +
+          artistObject?.ratingKey +
+          "/children",
+        headers: { accept: "application/json" },
+        params: {
+          excludeAllLeaves: 1,
+          includeUserState: 1,
+          "X-Plex-Product": plexClientinformation.product,
+          "X-Plex-Version": plexClientinformation.version,
+          "X-Plex-Client-Identifier": plexClientinformation.clientIdentifier,
+          "X-Plex-Token": server?.accessToken,
+        },
+      }).catch((err) => {
+        throw err;
+      });
+      console.debug(response.data);
+      for (const album of response.data.MediaContainer.Metadata) {
+        albums.push({
+          server: server.clientIdentifier,
+          library: musicLibrary.uuid,
+          Director: album.Director,
+          Genre: album.Genre,
+          addedAt: album.addedAt,
+          guid: album.guid,
+          index: album.index,
+          key: album.key,
+          lastViewedAt: album.lastViewedAt,
+          loudnessAnalysisVersion: album.loudnessAnalysisVersion,
+          musicAnalysisVersion: album.musicAnalysisVersion,
+          originallyAvailableAt: album.originallyAvailableAt,
+          parentGuid: album.parentGuid,
+          parentKey: album.parentKey,
+          parentRatingKey: album.parentRatingKey,
+          parentThumb: album.parentThumb,
+          parentTitle: album.parentTitle,
+          rating: album.rating,
+          ratingKey: album.ratingKey,
+          studio: album.studio,
+          summary: album.summary,
+          thumb:
+            server.preferredConnection.uri +
+            "/photo/:/transcode?" +
+            qs.stringify({
+              width: 240,
+              height: 240,
+              minSize: 1,
+              upscale: 1,
+              url: album.thumb + "?X-Plex-Token=" + server.accessToken,
+              "X-Plex-Token": server.accessToken,
+            }),
+          title: album.title,
+          type: album.type,
+          updatedAt: album.updatedAt,
+          viewCount: album.viewCount,
+          year: album.year,
+        });
+      }
+
+      let songResponse = await axios({
+        method: "GET",
+        url:
+          server.preferredConnection.uri +
+          "/library/sections/" +
+          library?.key +
+          "/all",
+        headers: { accept: "application/json" },
+        params: {
+          "album.subformat!": "Compilation,Live",
+          "artist.id": artistObject.ratingKey,
+          group: title,
+          limit: 100,
+          "ratingCount>": 1,
+          resolveTags: 1,
+          sort: "ratingCount:desc",
+          type: 10,
+          includeUserState: 1,
+          "X-Plex-Container-Start": 0,
+          "X-Plex-Container-Size": 20,
+          "X-Plex-Product": plexClientinformation.product,
+          "X-Plex-Version": plexClientinformation.version,
+          "X-Plex-Client-Identifier": plexClientinformation.clientIdentifier,
+          "X-Plex-Token": server?.accessToken,
+        },
+      }).catch((err) => {
+        throw err;
+      });
+      console.debug(songResponse.data);
+      for (const song of songResponse.data.MediaContainer.Metadata) {
+        songs.push({
+          server: server.clientIdentifier,
+          library: musicLibrary.uuid,
+          ratingKey: song.ratingKey,
+          key: song.key,
+          parentRatingKey: song.parentRatingKey,
+          grandparentRatingKey: song.grandparentRatingKey,
+          guid: song.guid,
+          parentGuid: song.parentGuid,
+          grandparentGuid: song.grandparentGuid,
+          type: song.type,
+          title: song.title,
+          grandparentKey: song.grandparentKey,
+          parentKey: song.parentKey,
+          grandparentTitle: song.grandparentTitle,
+          parentTitle: song.parentTitle,
+          originalTitle: song.originalTitle,
+          summary: song.summary,
+          index: song.index,
+          parentIndex: song.parentIndex,
+          thumb:
+            server.preferredConnection.uri +
+            "/photo/:/transcode?" +
+            qs.stringify({
+              width: 240,
+              height: 240,
+              minSize: 1,
+              upscale: 1,
+              url: song.thumb + "?X-Plex-Token=" + server.accessToken,
+              "X-Plex-Token": server.accessToken,
+            }),
+          parentThumb: song.parentThumb,
+          grandparentThumb: song.grandparentThumb,
+          duration: song.duration,
+          addedAt: song.addedAt,
+          updatedAt: song.updatedAt,
+          musicAnalysisVersion: song.musicAnalysisVersion,
+          Media: song.Media,
+        });
+      }
+    }
+  }
+  return { response, albums, songs };
+}
