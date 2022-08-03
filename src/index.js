@@ -19,4 +19,5 @@ export {
   LoadPlexSession,
   SavePlexSession,
   GetMusicHub,
+  GetArtistPage,
 } from "./PlexAPIOAuth/PlexAPIOAuth.js";
