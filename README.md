@@ -16,10 +16,7 @@ Examples Assume React Syntax
 The LoadPlexSession Function returns an object that contains the plexClientInformation and plexTVAuthToken keys/values according to how they were created
 ``` JavaScript
  const loadedSession = LoadPlexSession();
-if (
-    loadedSession.plexClientInformation === null ||
-    loadedSession.plexClientInformation === undefined
-){
+if (loadedSession.plexClientInformation == null){
     loadedSession.plexClientInformation = CreatePlexClientInformation();
 }
 
