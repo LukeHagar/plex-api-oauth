@@ -13,7 +13,8 @@ Examples Assume React Syntax
 
 ### Loading a Saved Session
 
-The LoadPlexSession Function returns an object that contains the plexClientInformation and plexTVAuthToken keys/values according to how they were created
+LoadPlexSession:  
+Function returns an object that contains the plexClientInformation and plexTVAuthToken keys/values according to how they were created
 ``` JavaScript
 const loadedSession = LoadPlexSession();
 if (loadedSession.plexClientInformation == null){
