@@ -11,7 +11,7 @@ This is a JavaScript Module written to take the OAuth Module written by @Dmbob h
 
 Examples Assume React Syntax
 
-### Loading a Saved State
+### Loading a Saved Session
 ``` JavaScript
  const loadedSession = LoadPlexSession();
 if (
