@@ -15,7 +15,7 @@ Examples Assume React Syntax
 
 The LoadPlexSession Function returns an object that contains the plexClientInformation and plexTVAuthToken keys/values according to how they were created
 ``` JavaScript
- const loadedSession = LoadPlexSession();
+const loadedSession = LoadPlexSession();
 if (loadedSession.plexClientInformation == null){
     loadedSession.plexClientInformation = CreatePlexClientInformation();
 }
@@ -48,3 +48,17 @@ const [plexTVAuthToken, setPlexTVAuthToken] = useState(
     SavePlexSession(plexClientInformation, tempPlexTVAuthToken);
   }
 ```
+
+### Get Plex Music Hub data
+``` JavaScript
+ async function UpdateHubs(plexClientInformation, plexServers, plexLibraries) {
+    const tempMusicHubs = await GetMusicHub(
+      plexClientInformation,
+      plexServers, // No Auth Token is needed since the server entries have their own access tokens
+      plexLibraries
+    );
+    setMusicHubs(tempMusicHubs);
+  }
+```
+
+
