@@ -4,21 +4,29 @@ import {
   PlexLogin,
   GetPlexUserData,
 } from "../src/index.js";
-import React from "React";
 
 describe("Unit Tests", function () {
   let emptyArray = [];
-  it("Generate ClientId and Login", async function () {
-    this.timeout(10000);
-    let plexSession = await PlexLogin(plexClientInformation);
+  var plexClientInformation;
+  var plexSession;
+
+  before(function (done) {
+    plexClientInformation = CreatePlexClientInformation();
+    plexSession = PlexLogin(plexClientInformation);
+    done();
+  });
+
+  it("Generate ClientId and Login", async function (done) {
+    this.timeout(3000);
     assert.notEqual(plexSession.plexTVAuthToken, null);
     assert.notEqual(plexSession.plexTVAuthToken, undefined);
     assert.notEqual(plexSession.plexClientInformation, null);
     assert.notEqual(plexSession.plexClientInformation, undefined);
     console.log("Client Info and Auth Token");
     console.log(plexSession);
+    done();
   });
-  it("Get Plex User Data", async function () {
+  it("Get Plex User Data", async function (done) {
     this.timeout(5000);
     let plexSession = await PlexLogin(plexClientInformation);
     let plexTVUserData = await GetPlexUserData(plexSession);
@@ -26,8 +34,9 @@ describe("Unit Tests", function () {
     assert.notEqual(plexTVUserData, null);
     console.log("User Data");
     console.log(plexTVUserData);
+    done();
   });
-  it("Get Plex Servers", async function () {
+  it("Get Plex Servers", async function (done) {
     this.timeout(12000);
     let plexSession = await PlexLogin(plexClientInformation);
     let plexTVUserData = await GetPlexUserData(plexSession);
@@ -37,6 +46,7 @@ describe("Unit Tests", function () {
     assert.notEqual(plexServers, undefined);
     console.log("Plex Servers");
     console.log(plexServers);
+    done();
   });
   // it("Get Plex Libraries", async function () {
   //   this.timeout(10000);
