@@ -115,6 +115,25 @@ const [plexTVAuthToken, setPlexTVAuthToken] = useState(
   );
 ```
 
+### Intersection observer Callback usage
+``` JavaScript
+                    if (libraryItems?.length === index + 100) {
+                      return (
+                        <Grid item xs="12" key={Obj.guid + index}>
+                          <ListItem ref={lastLibraryItem}>
+                            <ListItemAvatar>
+                              <Avatar alt={NoArt} src={Obj.thumb} />
+                            </ListItemAvatar>
+                            <Typography variant="h6" noWrap>
+                              {Obj.title} - {Obj.grandparentTitle} -{' '}
+                              {Obj.parentTitle}
+                            </Typography>
+                          </ListItem>
+                        </Grid>
+                      );
+                    }
+```
+
 ### Intersection observer to load more library items when the callbackref object comes into view
 ``` JavaScript
  const observer = useRef();
