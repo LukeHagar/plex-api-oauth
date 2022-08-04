@@ -3,6 +3,26 @@ import { v4 } from "uuid";
 import axios from "axios";
 import qs from "qs";
 
+export function CreatePlexClientInformation(
+  clientIdentifier = v4(),
+  product = FnBrowserDetect(),
+  device = navigator.userAgentData.platform,
+  version = navigator.userAgentData.brands[0].version,
+  forwardUrl = "",
+  platform = "Plex-API-OAuth"
+) {
+  let plexClientInformation = {
+    clientIdentifier: clientIdentifier,
+    product: product,
+    device: device,
+    version: version,
+    forwardUrl: forwardUrl,
+    platform: platform,
+  };
+  console.debug("Client Information generated successfully");
+  return plexClientInformation;
+}
+
 export async function PlexLogin(plexClientInformation) {
   var plexOauth = new PlexOauth(plexClientInformation);
   let data = await plexOauth.requestHostedLoginURL().catch((err) => {
@@ -84,7 +104,75 @@ export async function GetPlexDevices(plexClientInformation, plexTVAuthToken) {
   }).catch((err) => {
     throw err;
   });
-  return response.data;
+  console.debug("Plex Devices Reponse Query:");
+  console.debug(response.data);
+  for (const server of response.data) {
+    let localConnection = {};
+    let serverCapabilities = {};
+    let preferredConnection = {};
+    let relayConnection = {};
+    if (server.connections) {
+      if (server.connections.length > 0) {
+        relayConnection = server.connections.filter(
+          (connection) => connection.relay === true
+        )[0];
+        preferredConnection = server.connections.filter(
+          (connection) => connection.relay === true
+        )[0];
+        for (const connection of server.connections.filter(
+          (entry) => entry.local === true
+        )) {
+          if (localConnection === null && serverCapabilities === null) {
+            try {
+              let capabilitiesresponse = await axios({
+                method: "GET",
+                url:
+                  connection.uri +
+                  "/?" +
+                  qs.stringify({ "X-Plex-Token": server.accessToken }),
+                timeout: 1000,
+              });
+              localConnection = connection;
+              serverCapabilities = capabilitiesresponse.data.MediaContainer;
+              preferredConnection = connection;
+            } catch {}
+          }
+        }
+      }
+    }
+
+    serverArray.push({
+      name: server.name,
+      product: server.product,
+      productVersion: server.productVersion,
+      platform: server.platform,
+      platformVersion: server.platformVersion,
+      device: server.device,
+      clientIdentifier: server.clientIdentifier,
+      createdAt: server.createdAt,
+      lastSeenAt: server.lastSeenAt,
+      localConnection: localConnection,
+      preferredConnection: preferredConnection,
+      provides: server.provides,
+      ownerId: server.ownerId,
+      sourceTitle: server.sourceTitle,
+      publicAddress: server.publicAddress,
+      accessToken: server.accessToken,
+      owned: server.owned,
+      home: server.home,
+      synced: server.synced,
+      relay: server.relay,
+      relayConnection: relayConnection,
+      serverCapabilities: serverCapabilities,
+      presence: server.presence,
+      httpsRequired: server.httpsRequired,
+      publicAddressMatches: server.publicAddressMatches,
+      dnsRebindingProtection: server.dnsRebindingProtection,
+      natLoopbackSupported: server.natLoopbackSupported,
+      connections: server.connections,
+    });
+  }
+  return serverArray;
 }
 
 export async function GetPlexServers(plexClientInformation, plexTVAuthToken) {
@@ -105,6 +193,8 @@ export async function GetPlexServers(plexClientInformation, plexTVAuthToken) {
   }).catch((err) => {
     throw err;
   });
+  console.debug("Plex Servers Reponse Query:");
+  console.debug(response.data);
   for (const server of response.data.filter(
     (Obj) => Obj.product === "Plex Media Server"
   )) {
@@ -118,7 +208,7 @@ export async function GetPlexServers(plexClientInformation, plexTVAuthToken) {
     )) {
       if (localConnection === null && serverCapabilities === null) {
         try {
-          let response = await axios({
+          let capabilitiesresponse = await axios({
             method: "GET",
             url:
               connection.uri +
@@ -127,7 +217,7 @@ export async function GetPlexServers(plexClientInformation, plexTVAuthToken) {
             timeout: 1000,
           });
           localConnection = connection;
-          serverCapabilities = response.data.MediaContainer;
+          serverCapabilities = capabilitiesresponse.data.MediaContainer;
           preferredConnection = connection;
         } catch {}
       }
@@ -168,7 +258,7 @@ export async function GetPlexServers(plexClientInformation, plexTVAuthToken) {
   return serverArray;
 }
 
-export async function GetPlexLibraries(plexServers, plexLibraries) {
+export async function GetPlexLibraries(plexServers) {
   let libraryArray = [];
   for (const server of plexServers) {
     let response = await axios({
@@ -864,26 +954,6 @@ export function LoadPlexSession() {
   );
 }
 
-export function CreatePlexClientInformation(
-  clientIdentifier = v4(),
-  product = FnBrowserDetect(),
-  device = navigator.userAgentData.platform,
-  version = navigator.userAgentData.brands[0].version,
-  forwardUrl = "",
-  platform = "Plex-API-OAuth"
-) {
-  let plexClientInformation = {
-    clientIdentifier: clientIdentifier,
-    product: product,
-    device: device,
-    version: version,
-    forwardUrl: forwardUrl,
-    platform: platform,
-  };
-  console.debug("Client Information generated successfully");
-  return plexClientInformation;
-}
-
 export async function GetLibraryPages(
   plexServers,
   plexLibraries,
@@ -1076,15 +1146,12 @@ export async function GetArtistPage(
   let albums = [];
   let response = {};
   let songs = [];
-  let relatedAlbums = [];
-  for (const server of plexServers.filter(
-    (Obj) => Obj.clientIdentifier === artistObject.server
-  )) {
+  let relatedArtists = [];
+  //.filter((Obj) => Obj.clientIdentifier === artistObject.server)
+  //&&  Obj.uuid === artistObject.library;
+  for (const server of plexServers) {
     for (const musicLibrary of plexLibraries.filter(
-      (Obj) =>
-        Obj.server === server.clientIdentifier &&
-        Obj.type === "artist" &&
-        Obj.uuid === artistObject.library
+      (Obj) => Obj.server === server.clientIdentifier && Obj.type === "artist"
     )) {
       response = await axios({
         method: "GET",
@@ -1105,7 +1172,7 @@ export async function GetArtistPage(
       }).catch((err) => {
         throw err;
       });
-      console.debug(response.data);
+      console.warn(response.data);
       if (response.data.MediaContainer.size > 0) {
         for (const album of response.data.MediaContainer.Metadata) {
           albums.push({
@@ -1218,7 +1285,7 @@ export async function GetArtistPage(
         }
       }
 
-      let relatedAlbumsResponse = await axios({
+      let relatedArtistsResponse = await axios({
         method: "GET",
         url:
           server.preferredConnection.uri +
@@ -1238,49 +1305,59 @@ export async function GetArtistPage(
       }).catch((err) => {
         throw err;
       });
-      console.debug(relatedAlbumsResponse.data);
-      if (relatedAlbumsResponse.data.MediaContainer.size > 0) {
-        for (const album of relatedAlbumsResponse.data.MediaContainer.Hub[6]
-          .Metadata) {
-          relatedAlbums.push({
-            server: server.clientIdentifier,
-            library: musicLibrary.uuid,
-            Director: album.Director,
-            Genre: album.Genre,
-            addedAt: album.addedAt,
-            guid: album.guid,
-            index: album.index,
-            key: album.key,
-            lastViewedAt: album.lastViewedAt,
-            loudnessAnalysisVersion: album.loudnessAnalysisVersion,
-            musicAnalysisVersion: album.musicAnalysisVersion,
-            originallyAvailableAt: album.originallyAvailableAt,
-            parentGuid: album.parentGuid,
-            parentKey: album.parentKey,
-            parentRatingKey: album.parentRatingKey,
-            parentThumb: album.parentThumb,
-            parentTitle: album.parentTitle,
-            rating: album.rating,
-            ratingKey: album.ratingKey,
-            studio: album.studio,
-            summary: album.summary,
-            thumb:
-              server.preferredConnection.uri +
-              "/photo/:/transcode?" +
-              qs.stringify({
-                width: 240,
-                height: 240,
-                minSize: 1,
-                upscale: 1,
-                url: album.thumb + "?X-Plex-Token=" + server.accessToken,
-                "X-Plex-Token": server.accessToken,
-              }),
-            title: album.title,
-            type: album.type,
-            updatedAt: album.updatedAt,
-            viewCount: album.viewCount,
-            year: album.year,
-          });
+      console.debug(relatedArtistsResponse.data);
+      if (
+        relatedArtistsResponse.data.MediaContainer.Hub.some(function (Object) {
+          return Object.title === "Similar Artists";
+        })
+      ) {
+        let relatedArtistHub =
+          relatedArtistsResponse.data.MediaContainer.Hub.filter(
+            (Obj) => Obj.title === "Similar Artists"
+          );
+        console.warn(relatedArtistHub);
+        for (const hubAlbum of relatedArtistHub) {
+          for (const album of hubAlbum.Metadata) {
+            relatedArtists.push({
+              server: server.clientIdentifier,
+              library: musicLibrary.uuid,
+              Director: album.Director,
+              Genre: album.Genre,
+              addedAt: album.addedAt,
+              guid: album.guid,
+              index: album.index,
+              key: album.key,
+              lastViewedAt: album.lastViewedAt,
+              loudnessAnalysisVersion: album.loudnessAnalysisVersion,
+              musicAnalysisVersion: album.musicAnalysisVersion,
+              originallyAvailableAt: album.originallyAvailableAt,
+              parentGuid: album.parentGuid,
+              parentKey: album.parentKey,
+              parentRatingKey: album.parentRatingKey,
+              parentThumb: album.parentThumb,
+              parentTitle: album.parentTitle,
+              rating: album.rating,
+              ratingKey: album.ratingKey,
+              studio: album.studio,
+              summary: album.summary,
+              thumb:
+                server.preferredConnection.uri +
+                "/photo/:/transcode?" +
+                qs.stringify({
+                  width: 240,
+                  height: 240,
+                  minSize: 1,
+                  upscale: 1,
+                  url: album.thumb + "?X-Plex-Token=" + server.accessToken,
+                  "X-Plex-Token": server.accessToken,
+                }),
+              title: album.title,
+              type: album.type,
+              updatedAt: album.updatedAt,
+              viewCount: album.viewCount,
+              year: album.year,
+            });
+          }
         }
       }
 
@@ -1302,6 +1379,8 @@ export async function GetArtistPage(
           sort: "ratingCount:desc",
           type: 10,
           includeUserState: 1,
+          includeCollections: 1,
+          includeExternalMedia: 1,
           "X-Plex-Container-Start": 0,
           "X-Plex-Container-Size": 20,
           "X-Plex-Product": plexClientInformation.product,
@@ -1313,55 +1392,64 @@ export async function GetArtistPage(
         throw err;
       });
       console.debug(songResponse.data);
-      for (const song of songResponse.data.MediaContainer.Metadata) {
-        songs.push({
-          server: server.clientIdentifier,
-          library: musicLibrary.uuid,
-          ratingKey: song.ratingKey,
-          key: song.key,
-          parentRatingKey: song.parentRatingKey,
-          grandparentRatingKey: song.grandparentRatingKey,
-          guid: song.guid,
-          parentGuid: song.parentGuid,
-          grandparentGuid: song.grandparentGuid,
-          type: song.type,
-          title: song.title,
-          grandparentKey: song.grandparentKey,
-          parentKey: song.parentKey,
-          grandparentTitle: song.grandparentTitle,
-          parentTitle: song.parentTitle,
-          originalTitle: song.originalTitle,
-          summary: song.summary,
-          index: song.index,
-          parentIndex: song.parentIndex,
-          thumb:
-            server.preferredConnection.uri +
-            "/photo/:/transcode?" +
-            qs.stringify({
-              width: 240,
-              height: 240,
-              minSize: 1,
-              upscale: 1,
-              url: song.thumb + "?X-Plex-Token=" + server.accessToken,
-              "X-Plex-Token": server.accessToken,
-            }),
-          parentThumb: song.parentThumb,
-          grandparentThumb: song.grandparentThumb,
-          duration: song.duration,
-          addedAt: song.addedAt,
-          updatedAt: song.updatedAt,
-          musicAnalysisVersion: song.musicAnalysisVersion,
-          Media: song.Media,
-        });
+      if (songResponse.data.MediaContainer.size > 0) {
+        for (const song of songResponse.data.MediaContainer.Metadata) {
+          songs.push({
+            server: server.clientIdentifier,
+            library: musicLibrary.uuid,
+            ratingKey: song.ratingKey,
+            key: song.key,
+            parentRatingKey: song.parentRatingKey,
+            grandparentRatingKey: song.grandparentRatingKey,
+            guid: song.guid,
+            parentGuid: song.parentGuid,
+            grandparentGuid: song.grandparentGuid,
+            type: song.type,
+            title: song.title,
+            grandparentKey: song.grandparentKey,
+            parentKey: song.parentKey,
+            grandparentTitle: song.grandparentTitle,
+            parentTitle: song.parentTitle,
+            originalTitle: song.originalTitle,
+            summary: song.summary,
+            index: song.index,
+            parentIndex: song.parentIndex,
+            thumb:
+              server.preferredConnection.uri +
+              "/photo/:/transcode?" +
+              qs.stringify({
+                width: 240,
+                height: 240,
+                minSize: 1,
+                upscale: 1,
+                url: song.thumb + "?X-Plex-Token=" + server.accessToken,
+                "X-Plex-Token": server.accessToken,
+              }),
+            parentThumb: song.parentThumb,
+            grandparentThumb: song.grandparentThumb,
+            duration: song.duration,
+            addedAt: song.addedAt,
+            updatedAt: song.updatedAt,
+            musicAnalysisVersion: song.musicAnalysisVersion,
+            Media: song.Media,
+          });
+        }
       }
     }
   }
+
+  const albumArray = albums
+    .map((item) => {
+      return Object.fromEntries(Object.entries(item).sort());
+    })
+    .map(JSON.stringify);
+
   return {
     inputObject: artistObject,
     response: response.data,
-    albums,
+    albums: [...new Set(albumArray)].map(JSON.parse),
     songs,
-    relatedAlbums,
+    relatedArtists,
   };
 }
 
