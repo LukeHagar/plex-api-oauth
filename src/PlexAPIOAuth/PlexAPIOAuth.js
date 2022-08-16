@@ -3,14 +3,14 @@ import { v4 } from "uuid";
 import axios from "axios";
 import qs from "qs";
 
-export function CreatePlexClientInformation(
+export function CreatePlexClientInformation({
   clientIdentifier = v4(),
   product = FnBrowserDetect(),
   device = navigator.userAgentData.platform,
   version = navigator.userAgentData.brands[0].version,
   forwardUrl = "",
-  platform = "Plex-API-OAuth"
-) {
+  platform = "Plex-API-OAuth",
+}) {
   let plexClientInformation = {
     clientIdentifier: clientIdentifier,
     product: product,
