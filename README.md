@@ -8,7 +8,7 @@ https://www.npmjs.com/package/plex-api-oauth
 
 This is a JavaScript Module written to take the OAuth Module written by @Dmbob https://github.com/Dmbob/plex-oauth and incorporate it into a front end friend frame work to make development of Plex API Based applications better
 
-# Interactive API Explorer: https://lukehagar.com/plex-api-oauth
+# Interactive API Explorer: https://lukehagar.com/projects/plex-api-oauth
 
 ## How to Use
 
