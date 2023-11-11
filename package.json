@@ -17,7 +17,7 @@
   "author": "Luke Hagar",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "plex-oauth": "^2.0.2",
     "qs": "^6.11.0",
     "uuid": "^8.3.2"
