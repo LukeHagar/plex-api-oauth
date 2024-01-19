@@ -3,6 +3,10 @@ import { v4 } from "uuid";
 import axios from "axios";
 import qs from "qs";
 
+console.log(
+  "THIS PACKAGE IS DEPRECATED. USE `@lukehagar/plexjs` https://github.com/LukeHagar/plexjs INSTEAD"
+);
+
 export function CreatePlexClientInformation({
   clientIdentifier = v4(),
   product = FnBrowserDetect(),

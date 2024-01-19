@@ -1,3 +1,7 @@
+console.log(
+  "THIS PACKAGE IS DEPRECATED. USE `@lukehagar/plexjs` https://github.com/LukeHagar/plexjs INSTEAD"
+);
+
 export {
   CreatePlexClientInformation,
   PlexLogin,

@@ -1,5 +1,7 @@
 # plex-api-oauth
 
+# THIS PACKAGE IS DEPRECATED IN FAVOR OF https://github.com/LukeHagar/plexjs
+
 An NPM Module designed to make Plex Media Server and plex.tv API calls easier to implement in JavaScript and React projects
 
 <img src="https://img.shields.io/lgtm/grade/javascript/github/LukeHagar/plex-api-oauth" /> <img src="https://img.shields.io/npm/dw/plex-api-oauth" />
@@ -7,8 +9,6 @@ An NPM Module designed to make Plex Media Server and plex.tv API calls easier to
 https://www.npmjs.com/package/plex-api-oauth
 
 This is a JavaScript Module written to take the OAuth Module written by @Dmbob https://github.com/Dmbob/plex-oauth and incorporate it into a front end friend frame work to make development of Plex API Based applications better
-
-# Interactive API Explorer: https://lukehagar.com/projects/plex-api-oauth
 
 ## How to Use
 
